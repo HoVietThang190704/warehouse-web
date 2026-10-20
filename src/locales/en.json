@@ -18,6 +18,11 @@
     "kitchenStaff": "WAREHOUSE_STAFF",
     "customer": "STAFF"
   },
+  "errors": {
+    "title": "An error occurred",
+    "defaultMessage": "System encountered an unexpected issue.",
+    "retry": "Try again"
+  },
   "auth": {
     "loginTitle": "Warehouse Sign In",
     "loginSubtitle": "Enter credentials to access warehouse management dashboard.",
@@ -100,6 +105,22 @@
     "modalCreateTitle": "Create New Category",
     "menuCategories": "Categories",
     "menuProducts": "Products",
-    "menuInventory": "Stock & Balances"
+    "menuInventory": "Stock & Balances",
+    "collapseSidebar": "Collapse sidebar",
+    "expandSidebar": "Expand sidebar",
+    "copied": "Copied!",
+    "categoryTableName": "Category Name",
+    "categoryTableCount": "Products Count",
+    "categoryTableStatus": "Status",
+    "edit": "Edit",
+    "delete": "Delete",
+    "noDataTitle": "No data",
+    "noCategoriesDesc": "No categories created yet",
+    "categoryNameLabel": "Category Name",
+    "categoryNamePlaceholder": "e.g. Electronics, Packaging...",
+    "searchCategoryPlaceholder": "Search categories...",
+    "ordersTitle": "Documents & Orders",
+    "ordersSubtitle": "Track receipts, issues and orders history",
+    "ordersComingSoon": "Extended feature for next phase"
   }
 }

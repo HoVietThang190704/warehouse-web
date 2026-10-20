@@ -9,7 +9,7 @@
     "active": "Đang hoạt động",
     "actions": "Thao tác",
     "loading": "Đang tải...",
-    "itemsCount": "sản phẩm",
+    "itemsCount": "mặt hàng",
     "uncategorized": "Chưa phân loại",
     "inactive": "Tạm ngừng",
     "superAdmin": "SUPER_ADMIN",
@@ -17,6 +17,11 @@
     "cashier": "WAREHOUSE_STAFF",
     "kitchenStaff": "WAREHOUSE_STAFF",
     "customer": "STAFF"
+  },
+  "errors": {
+    "title": "Đã có lỗi xảy ra",
+    "defaultMessage": "Hệ thống gặp sự cố trong quá trình xử lý.",
+    "retry": "Thử lại ngay"
   },
   "auth": {
     "loginTitle": "Đăng Nhập Quản Lý Kho",
@@ -100,6 +105,22 @@
     "modalCreateTitle": "Tạo Nhóm Hàng Mới",
     "menuCategories": "Nhóm Hàng",
     "menuProducts": "Hàng Hóa",
-    "menuInventory": "Tồn Kho"
+    "menuInventory": "Tồn Kho",
+    "collapseSidebar": "Thu gọn thanh điều hướng",
+    "expandSidebar": "Mở rộng thanh điều hướng",
+    "copied": "Đã sao chép!",
+    "categoryTableName": "Tên Nhóm Hàng",
+    "categoryTableCount": "Số Lượng Hàng",
+    "categoryTableStatus": "Trạng Thái",
+    "edit": "Chỉnh sửa",
+    "delete": "Xóa",
+    "noDataTitle": "Không có dữ liệu",
+    "noCategoriesDesc": "Chưa có nhóm hàng nào được tạo",
+    "categoryNameLabel": "Tên nhóm hàng",
+    "categoryNamePlaceholder": "Ví dụ: Thiết bị điện tử, Linh kiện...",
+    "searchCategoryPlaceholder": "Tìm kiếm nhóm hàng...",
+    "ordersTitle": "Chứng Từ & Đơn Hàng",
+    "ordersSubtitle": "Theo dõi lịch sử chứng từ xuất nhập và đơn đặt hàng",
+    "ordersComingSoon": "Tính năng mở rộng cho giai đoạn sau"
   }
 }

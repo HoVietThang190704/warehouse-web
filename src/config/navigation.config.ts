@@ -82,3 +82,12 @@ export function getActiveNavKey(pathname: string): string {
 
   return 'overview';
 }
+
+/**
+ * Trả về index của NavItem tương ứng theo pathname (phục vụ swipe gesture mobile)
+ */
+export function getNavIndex(pathname: string): number {
+  const activeKey = getActiveNavKey(pathname);
+  const index = NAV_ITEMS.findIndex((item) => item.key === activeKey);
+  return index !== -1 ? index : 0;
+}
