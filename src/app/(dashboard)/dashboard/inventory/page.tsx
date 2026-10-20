@@ -2,345 +2,153 @@
 
 import React, { useState, useMemo } from 'react';
 import {
-  SushiPageHeader,
   SushiButton,
-  Button,
-  Plus,
-  ArrowRight,
-  CookingPot,
-  Package,
-  Receipt,
+  SushiPageHeader,
   Input,
+  Switch,
   MagnifyingGlass,
-  Tabs,
-  Select,
+  ArrowDown,
+  ArrowUp,
+  WarningCircle,
 } from '@/components/ui';
 import {
-  Ingredient,
-  TransactionType,
-  useIngredients,
-  useInventoryTransactions,
-  useCreateIngredient,
-  useCreateTransaction,
   StockBalanceTable,
-  StockTransactionTable,
-  CreateIngredientModal,
-  CreateTransactionModal,
+  StockReceiptModal,
+  StockIssueModal,
+  useStockBalances,
+  StockBalanceItem,
 } from '@/features/inventory';
-import { useTranslation } from '@/lib/i18n';
 
 export default function InventoryPage() {
-  const { t } = useTranslation();
-
-  // Dialog & Modal States
-  const [isIngredientModalOpen, setIsIngredientModalOpen] = useState(false);
-  const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
-  const [transactionType, setTransactionType] = useState<TransactionType>('IN');
-  const [selectedIngredient, setSelectedIngredient] = useState<Ingredient | null>(null);
-
-  // Filter States
-  const [activeTab, setActiveTab] = useState<string>('balance');
   const [search, setSearch] = useState('');
-  const [alertFilter, setAlertFilter] = useState<'ALL' | 'ALERTS'>('ALL');
+  const [lowStockOnly, setLowStockOnly] = useState(false);
 
-  // TanStack Query Hooks
-  const { data: ingredients = [], isLoading: ingredientsLoading } = useIngredients();
-  const { data: stockInTransactions = [], isLoading: inLoading } = useInventoryTransactions('IN');
-  const { data: stockOutTransactions = [], isLoading: outLoading } = useInventoryTransactions('OUT');
+  const [receiptModalOpen, setReceiptModalOpen] = useState(false);
+  const [issueModalOpen, setIssueModalOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<StockBalanceItem | null>(null);
 
-  // Mutation Hooks
-  const createIngredientMutation = useCreateIngredient();
-  const createTransactionMutation = useCreateTransaction();
+  const { data: balances = [], isLoading } = useStockBalances({
+    lowStockOnly,
+    search,
+  });
 
-  // Danh sách nguyên liệu sau lọc
-  const filteredIngredients = useMemo(() => {
-    return ingredients.filter((item) => {
-      // 1. Lọc theo trạng thái cảnh báo
-      if (alertFilter === 'ALERTS' && !item.isAlert) {
-        return false;
-      }
+  // Calculate quick summary metrics
+  const totalStockUnits = useMemo(() => {
+    return balances.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+  }, [balances]);
 
-      // 2. Lọc theo từ khóa tìm kiếm (mã, tên)
-      if (search.trim()) {
-        const query = search.toLowerCase().trim();
-        const matchCode = item.code.toLowerCase().includes(query);
-        const matchName = item.name.toLowerCase().includes(query);
-        return matchCode || matchName;
-      }
+  const lowStockCount = useMemo(() => {
+    return balances.filter((item) => item.isLowStock).length;
+  }, [balances]);
 
-      return true;
-    });
-  }, [ingredients, alertFilter, search]);
-
-  // Thống kê cảnh báo
-  const alertCount = useMemo(() => {
-    return ingredients.filter((item) => item.isAlert).length;
-  }, [ingredients]);
-
-  const handleOpenStockIn = (ingredient?: Ingredient) => {
-    setSelectedIngredient(ingredient || null);
-    setTransactionType('IN');
-    setIsTransactionModalOpen(true);
+  const handleQuickIn = (item: StockBalanceItem) => {
+    setSelectedItem(item);
+    setReceiptModalOpen(true);
   };
 
-  const handleOpenStockOut = (ingredient?: Ingredient) => {
-    setSelectedIngredient(ingredient || null);
-    setTransactionType('OUT');
-    setIsTransactionModalOpen(true);
+  const handleQuickOut = (item: StockBalanceItem) => {
+    setSelectedItem(item);
+    setIssueModalOpen(true);
   };
 
   return (
-    <div className="space-y-6">
-      {/* =========================================================================
-          1. Header & Nút Hành Động Nhanh
-         ========================================================================= */}
+    <div className="space-y-5">
       <SushiPageHeader
-        title={t('dashboard.inventoryTitle')}
-        subtitle={t('dashboard.inventorySubtitle')}
+        title="Sổ Theo Dõi Tồn Kho"
+        subtitle="Giám sát số lượng tồn kho theo thời gian thực, cảnh báo hụt hàng và thao tác xuất nhập"
         extra={
-          <div className="flex flex-wrap items-center gap-2.5">
-            <Button
-              icon={<ArrowRight size={15} className="text-amber-400" />}
-              onClick={() => handleOpenStockOut()}
-              className="rounded-xl border-amber-500/30 text-amber-400 hover:text-amber-300 hover:bg-amber-500/10"
-            >
-              {t('dashboard.stockOut')}
-            </Button>
-
+          <div className="flex items-center space-x-2.5">
             <SushiButton
               type="primary"
-              icon={<Plus size={16} weight="bold" />}
-              onClick={() => handleOpenStockIn()}
+              icon={<ArrowDown size={16} weight="bold" />}
+              onClick={() => {
+                setSelectedItem(null);
+                setReceiptModalOpen(true);
+              }}
+              className="bg-emerald-600 hover:bg-emerald-500 font-semibold"
             >
-              {t('dashboard.stockIn')}
+              Nhập Kho
             </SushiButton>
-
-            <Button
-              icon={<CookingPot size={16} />}
-              onClick={() => setIsIngredientModalOpen(true)}
-              className="rounded-xl"
+            <SushiButton
+              type="primary"
+              icon={<ArrowUp size={16} weight="bold" />}
+              onClick={() => {
+                setSelectedItem(null);
+                setIssueModalOpen(true);
+              }}
+              className="bg-blue-600 hover:bg-blue-500 font-semibold"
             >
-              {t('dashboard.addIngredient')}
-            </Button>
+              Xuất Kho
+            </SushiButton>
           </div>
         }
       />
 
-      {/* =========================================================================
-          2. KPI Bento Cards (4 Thẻ Thống Kê Tổng Quan Kho)
-         ========================================================================= */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Metric 1: Tổng Nguyên Liệu */}
-        <div className="p-5 rounded-2xl bg-sushi-card border border-sushi-border/90 shadow-md">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-sushi-text-muted">
-              {t('dashboard.totalIngredients')}
-            </span>
-            <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
-              <CookingPot size={20} weight="fill" />
-            </div>
+      {/* Filter and Quick Stats Toolbar */}
+      <div className="p-4 rounded-2xl bg-sushi-card border border-sushi-border flex flex-col md:flex-row gap-3 items-center justify-between shadow-sm">
+        <div className="flex flex-col sm:flex-row gap-3 items-center w-full md:w-auto flex-1">
+          {/* Ô Tìm kiếm */}
+          <div className="w-full sm:w-80">
+            <Input
+              prefix={<MagnifyingGlass size={16} className="text-sushi-text-dim" />}
+              placeholder="Tìm theo tên hàng, mã SKU, barcode..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              allowClear
+              className="w-full"
+            />
           </div>
-          <div className="mt-4 flex items-baseline justify-between">
-            <span className="text-3xl font-bold text-sushi-text tracking-tight font-sans">
-              {ingredients.length}
-            </span>
-            <span className="text-2xs text-sushi-text-dim font-mono">
-              Nguyên vật liệu F&B
-            </span>
-          </div>
-        </div>
 
-        {/* Metric 2: Cảnh Báo Tồn (Hết Hàng / Gần Hết) */}
-        <div
-          className={`p-5 rounded-2xl bg-sushi-card border shadow-md transition-colors ${
-            alertCount > 0
-              ? 'border-red-500/50 bg-gradient-to-br from-sushi-card to-red-500/5'
-              : 'border-sushi-border/90'
-          }`}
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-sushi-text-muted">
-              {t('dashboard.alertItemsCount')}
-            </span>
-            <div
-              className={`w-10 h-10 rounded-xl border flex items-center justify-center ${
-                alertCount > 0
-                  ? 'bg-red-500/15 border-red-500/35 text-red-400'
-                  : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
-              }`}
-            >
-              <Package size={20} weight="fill" />
-            </div>
-          </div>
-          <div className="mt-4 flex items-baseline justify-between">
+          {/* Toggle Lọc hàng sắp hết */}
+          <div className="flex items-center space-x-2.5 px-3 py-1.5 rounded-xl bg-sushi-surface border border-sushi-border self-start sm:self-auto cursor-pointer">
+            <Switch
+              checked={lowStockOnly}
+              onChange={setLowStockOnly}
+              className={lowStockOnly ? 'bg-amber-500' : ''}
+            />
             <span
-              className={`text-3xl font-bold tracking-tight font-sans ${
-                alertCount > 0 ? 'text-red-400' : 'text-emerald-400'
-              }`}
+              onClick={() => setLowStockOnly(!lowStockOnly)}
+              className="text-xs font-semibold text-sushi-text select-none flex items-center space-x-1.5"
             >
-              {alertCount}
-            </span>
-            <span className="text-2xs font-mono text-sushi-text-dim">
-              {alertCount > 0 ? 'Cần nhập bổ sung' : 'Mức tồn an toàn'}
+              <WarningCircle size={15} className="text-amber-400" />
+              <span>Chỉ hiện hàng sắp hết (&le; 5)</span>
             </span>
           </div>
         </div>
 
-        {/* Metric 3: Lượt Phiếu Nhập Kho */}
-        <div className="p-5 rounded-2xl bg-sushi-card border border-sushi-border/90 shadow-md">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-sushi-text-muted">
-              {t('dashboard.totalStockInCount')}
-            </span>
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
-              <Receipt size={20} weight="fill" />
+        {/* Quick Summary Pill */}
+        <div className="flex items-center space-x-4 text-xs font-mono self-end md:self-auto">
+          <div>
+            Tổng tồn: <strong className="text-white text-sm">{totalStockUnits}</strong> đơn vị
+          </div>
+          {lowStockCount > 0 && (
+            <div className="px-2.5 py-1 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 font-semibold flex items-center space-x-1 animate-pulse">
+              <span>⚠️ Cần nhập:</span>
+              <span className="text-sm">{lowStockCount}</span>
             </div>
-          </div>
-          <div className="mt-4 flex items-baseline justify-between">
-            <span className="text-3xl font-bold text-sushi-text tracking-tight font-sans">
-              {stockInTransactions.length}
-            </span>
-            <span className="text-2xs text-emerald-400 font-mono">Phiếu PNK</span>
-          </div>
-        </div>
-
-        {/* Metric 4: Lượt Phiếu Xuất Kho */}
-        <div className="p-5 rounded-2xl bg-sushi-card border border-sushi-border/90 shadow-md">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-sushi-text-muted">
-              {t('dashboard.totalStockOutCount')}
-            </span>
-            <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
-              <Receipt size={20} weight="fill" />
-            </div>
-          </div>
-          <div className="mt-4 flex items-baseline justify-between">
-            <span className="text-3xl font-bold text-sushi-text tracking-tight font-sans">
-              {stockOutTransactions.length}
-            </span>
-            <span className="text-2xs text-amber-400 font-mono">Phiếu PXK</span>
-          </div>
+          )}
         </div>
       </div>
 
-      {/* =========================================================================
-          3. Toolbar Tìm Kiếm & Lọc Nhanh (Chỉ áp dụng khi ở Tab Tồn Kho)
-         ========================================================================= */}
-      {activeTab === 'balance' && (
-        <div className="p-4 rounded-2xl bg-sushi-card border border-sushi-border/80 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-3 flex-1">
-            <div className="w-full sm:w-80">
-              <Input
-                prefix={<MagnifyingGlass size={16} className="text-sushi-text-dim mr-1.5" />}
-                placeholder={t('dashboard.searchIngredientPlaceholder')}
-                allowClear
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="rounded-xl"
-              />
-            </div>
-
-            <div className="w-full sm:w-48">
-              <Select
-                className="w-full"
-                value={alertFilter}
-                onChange={(val) => setAlertFilter(val)}
-                options={[
-                  { value: 'ALL', label: t('dashboard.filterAlertAll') },
-                  { value: 'ALERTS', label: t('dashboard.filterAlertOnly') },
-                ]}
-              />
-            </div>
-          </div>
-
-          <div className="text-xs font-mono text-sushi-text-dim shrink-0">
-            <span>
-              {filteredIngredients.length} / {ingredients.length} {t('common.itemsCount')}
-            </span>
-          </div>
-        </div>
-      )}
-
-      {/* =========================================================================
-          4. Tabs Giao Diện: Tồn Kho & Cảnh Báo / Lịch Sử Nhập / Lịch Sử Xuất
-         ========================================================================= */}
-      <div className="rounded-2xl bg-sushi-card border border-sushi-border/80 p-4 shadow-sm">
-        <Tabs
-          activeKey={activeTab}
-          onChange={setActiveTab}
-          animated={{ inkBar: true, tabPane: true }}
-          items={[
-            {
-              key: 'balance',
-              label: (
-                <span className="flex items-center space-x-2">
-                  <span>{t('dashboard.tabStockBalance')}</span>
-                  {alertCount > 0 && (
-                    <span className="px-1.5 py-0.2 rounded-full text-2xs font-mono font-bold bg-red-500 text-white">
-                      {alertCount}
-                    </span>
-                  )}
-                </span>
-              ),
-              children: (
-                <div className="pt-2">
-                  <StockBalanceTable
-                    ingredients={filteredIngredients}
-                    loading={ingredientsLoading}
-                    onStockIn={(item) => handleOpenStockIn(item)}
-                    onStockOut={(item) => handleOpenStockOut(item)}
-                  />
-                </div>
-              ),
-            },
-            {
-              key: 'in',
-              label: t('dashboard.tabStockInHistory'),
-              children: (
-                <div className="pt-2">
-                  <StockTransactionTable
-                    transactions={stockInTransactions}
-                    loading={inLoading}
-                  />
-                </div>
-              ),
-            },
-            {
-              key: 'out',
-              label: t('dashboard.tabStockOutHistory'),
-              children: (
-                <div className="pt-2">
-                  <StockTransactionTable
-                    transactions={stockOutTransactions}
-                    loading={outLoading}
-                  />
-                </div>
-              ),
-            },
-          ]}
-        />
-      </div>
-
-      {/* =========================================================================
-          5. Các Modal Nhập Liệu
-         ========================================================================= */}
-      <CreateIngredientModal
-        open={isIngredientModalOpen}
-        onClose={() => setIsIngredientModalOpen(false)}
-        onSubmit={async (dto) => {
-          await createIngredientMutation.mutateAsync(dto);
-        }}
+      {/* Table Sổ Tồn Kho */}
+      <StockBalanceTable
+        balances={balances}
+        loading={isLoading}
+        onQuickIn={handleQuickIn}
+        onQuickOut={handleQuickOut}
       />
 
-      <CreateTransactionModal
-        open={isTransactionModalOpen}
-        defaultType={transactionType}
-        selectedIngredient={selectedIngredient}
-        ingredients={ingredients}
-        onClose={() => setIsTransactionModalOpen(false)}
-        onSubmit={async (dto) => {
-          await createTransactionMutation.mutateAsync(dto);
-        }}
+      {/* Modals */}
+      <StockReceiptModal
+        open={receiptModalOpen}
+        onClose={() => setReceiptModalOpen(false)}
+        preselectedItem={selectedItem}
+      />
+
+      <StockIssueModal
+        open={issueModalOpen}
+        onClose={() => setIssueModalOpen(false)}
+        preselectedItem={selectedItem}
       />
     </div>
   );

@@ -1,201 +1,228 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import {
   Table,
+  Tag,
   Typography,
-  CookingPot,
-  Plus,
-  ArrowRight,
+  Package,
   Tooltip,
+  Button,
+  WarningCircle,
+  CheckCircle,
+  ArrowDown,
+  ArrowUp,
 } from '@/components/ui';
-import { Ingredient } from '../types';
-import { useTranslation } from '@/lib/i18n';
+import { StockBalanceItem } from '../types';
+import { useFormatCurrency } from '@/lib/hooks/use-format-currency';
 
 const { Text } = Typography;
 
 interface StockBalanceTableProps {
-  ingredients: Ingredient[];
+  balances: StockBalanceItem[];
   loading?: boolean;
-  onStockIn?: (ingredient: Ingredient) => void;
-  onStockOut?: (ingredient: Ingredient) => void;
+  onQuickIn?: (item: StockBalanceItem) => void;
+  onQuickOut?: (item: StockBalanceItem) => void;
 }
 
 export function StockBalanceTable({
-  ingredients,
+  balances,
   loading,
-  onStockIn,
-  onStockOut,
+  onQuickIn,
+  onQuickOut,
 }: StockBalanceTableProps) {
-  const { t } = useTranslation();
+  const { formatCurrency } = useFormatCurrency();
 
   const columns = [
     {
-      title: t('dashboard.ingredientCode'),
-      dataIndex: 'code',
-      key: 'code',
-      width: 130,
-      render: (code: string) => (
-        <span className="px-2.5 py-1 rounded-md bg-sushi-surface border border-sushi-border text-sushi-text-muted text-xs font-mono font-semibold">
-          {code}
-        </span>
-      ),
-    },
-    {
-      title: t('dashboard.ingredientName'),
-      dataIndex: 'name',
-      key: 'name',
-      render: (name: string) => (
-        <div className="flex items-center space-x-3 py-1">
-          <div className="w-8 h-8 rounded-xl bg-sushi-surface border border-sushi-border text-sushi-primary flex items-center justify-center shrink-0 shadow-sm">
-            <CookingPot size={17} weight="fill" />
-          </div>
-          <Text strong className="text-sushi-text block text-sm font-sans truncate">
-            {name}
-          </Text>
+      title: 'Ảnh',
+      dataIndex: 'productImage',
+      key: 'productImage',
+      width: 76,
+      render: (url: string | null | undefined, record: StockBalanceItem) => (
+        <div className="w-11 h-11 rounded-xl overflow-hidden border border-sushi-border bg-sushi-surface flex items-center justify-center shrink-0 shadow-sm">
+          {url ? (
+            <Image
+              src={url}
+              alt={record.productName}
+              width={44}
+              height={44}
+              className="object-cover w-full h-full"
+              unoptimized
+            />
+          ) : (
+            <Package size={20} className="text-sushi-text-dim" />
+          )}
         </div>
       ),
     },
     {
-      title: t('dashboard.ingredientUnit'),
-      dataIndex: 'unit',
-      key: 'unit',
-      width: 100,
-      render: (unit: string) => (
-        <span className="text-xs text-sushi-text-muted font-medium px-2 py-0.5 rounded bg-sushi-surface/80 border border-sushi-border/60">
-          {unit}
+      title: 'Tên hàng hóa & SKU',
+      dataIndex: 'productName',
+      key: 'productName',
+      render: (name: string, record: StockBalanceItem) => (
+        <div className="py-1">
+          <Text strong className="text-sushi-text block text-sm font-sans">
+            {name}
+          </Text>
+          <div className="flex items-center space-x-2 text-2xs text-sushi-text-dim font-mono mt-0.5">
+            <span className="text-blue-400 font-semibold">SKU: {record.productSku}</span>
+            {record.productBarcode && (
+              <>
+                <span>·</span>
+                <span>Barcode: {record.productBarcode}</span>
+              </>
+            )}
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: 'Nhóm hàng',
+      dataIndex: 'categoryName',
+      key: 'categoryName',
+      width: 160,
+      render: (category: string) => (
+        <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-sushi-surface border border-sushi-border text-sushi-text-muted">
+          {category || 'Chưa phân loại'}
         </span>
       ),
     },
     {
-      title: t('dashboard.currentStock'),
-      dataIndex: 'currentStock',
-      key: 'currentStock',
-      width: 150,
-      render: (stock: number, record: Ingredient) => {
-        let colorClass = 'text-emerald-400';
-        if (record.status === 'OUT_OF_STOCK') colorClass = 'text-red-400 font-extrabold';
-        else if (record.status === 'LOW_STOCK') colorClass = 'text-amber-400 font-bold';
-
+      title: 'Đơn vị',
+      dataIndex: 'unitName',
+      key: 'unitName',
+      width: 90,
+      render: (unit: string) => (
+        <span className="text-xs font-mono font-medium text-slate-300">
+          {unit || 'Cái'}
+        </span>
+      ),
+    },
+    {
+      title: 'Số lượng tồn kho',
+      dataIndex: 'quantity',
+      key: 'quantity',
+      width: 160,
+      render: (qty: number, record: StockBalanceItem) => {
+        const isLow = record.isLowStock;
+        const isOut = qty <= 0;
         return (
-          <div className="flex items-baseline space-x-1.5 font-mono">
-            <span className={`text-base ${colorClass}`}>{stock}</span>
-            <span className="text-2xs text-sushi-text-dim">{record.unit}</span>
+          <div className="flex items-center space-x-2">
+            <span
+              className={`text-base font-extrabold font-mono ${
+                isOut
+                  ? 'text-rose-500'
+                  : isLow
+                  ? 'text-amber-400'
+                  : 'text-emerald-400'
+              }`}
+            >
+              {qty}
+            </span>
+            <span className="text-2xs text-sushi-text-dim font-mono">
+              {record.unitName}
+            </span>
           </div>
         );
       },
     },
     {
-      title: t('dashboard.minStock'),
+      title: 'Ngưỡng cảnh báo',
       dataIndex: 'minStock',
       key: 'minStock',
       width: 140,
-      render: (min: number, record: Ingredient) => (
-        <span className="text-xs text-sushi-text-dim font-mono">
-          {min} {record.unit}
+      render: (min: number) => (
+        <span className="text-xs font-mono text-slate-400">
+          &le; <strong className="text-amber-400">{min || 5}</strong>
         </span>
       ),
     },
     {
-      title: t('common.status'),
+      title: 'Trạng thái tồn kho',
+      dataIndex: 'status',
       key: 'status',
-      width: 150,
-      render: (_: unknown, record: Ingredient) => {
-        if (record.status === 'OUT_OF_STOCK') {
+      width: 180,
+      render: (_: unknown, record: StockBalanceItem) => {
+        if (record.quantity <= 0) {
           return (
-            <span className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-500/15 border border-red-500/35 text-red-400 shadow-sm">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-              </span>
-              <span>{t('dashboard.alertOut')}</span>
+            <span className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-500/15 border border-rose-500/30 text-rose-400">
+              <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
+              <span>Hết hàng (0)</span>
             </span>
           );
         }
 
-        if (record.status === 'LOW_STOCK') {
+        if (record.isLowStock) {
           return (
-            <span className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/15 border border-amber-500/35 text-amber-400">
-              <span className="w-2 h-2 rounded-full bg-amber-500"></span>
-              <span>{t('dashboard.alertLow')}</span>
+            <span className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/15 border border-amber-500/40 text-amber-300 shadow-sm animate-pulse">
+              <WarningCircle size={14} className="text-amber-400 shrink-0" />
+              <span>Sắp hết (Còn {record.quantity})</span>
             </span>
           );
         }
 
         return (
-          <span className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 border border-emerald-500/25 text-emerald-400">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-            <span>{t('dashboard.alertSafe')}</span>
+          <span className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+            <CheckCircle size={14} className="text-emerald-400 shrink-0" />
+            <span>Đủ hàng</span>
           </span>
         );
       },
     },
     {
-      title: t('common.actions'),
+      title: 'Thao tác nhanh',
       key: 'actions',
-      width: 130,
+      width: 170,
       align: 'right' as const,
-      render: (_: unknown, record: Ingredient) => (
-        <div className="flex items-center justify-end space-x-1.5">
-          <Tooltip title={t('dashboard.quickStockIn')}>
-            <button
-              type="button"
-              onClick={() => onStockIn?.(record)}
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-emerald-400 hover:bg-emerald-500/15 transition-colors cursor-pointer border border-emerald-500/20"
-              aria-label={t('dashboard.quickStockIn')}
-            >
-              <Plus size={15} weight="bold" />
-            </button>
-          </Tooltip>
+      render: (_: unknown, record: StockBalanceItem) => (
+        <div className="flex items-center justify-end space-x-2">
+          {onQuickIn && (
+            <Tooltip title="Nhập thêm hàng vào kho">
+              <Button
+                size="small"
+                icon={<ArrowDown size={14} />}
+                onClick={() => onQuickIn(record)}
+                className="bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/40 border-emerald-500/30 text-xs"
+              >
+                Nhập
+              </Button>
+            </Tooltip>
+          )}
 
-          <Tooltip title={t('dashboard.quickStockOut')}>
-            <button
-              type="button"
-              onClick={() => onStockOut?.(record)}
-              disabled={record.currentStock <= 0}
-              className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors border ${
-                record.currentStock <= 0
-                  ? 'opacity-40 cursor-not-allowed text-zinc-500 border-zinc-700'
-                  : 'text-amber-400 hover:bg-amber-500/15 cursor-pointer border-amber-500/20'
-              }`}
-              aria-label={t('dashboard.quickStockOut')}
-            >
-              <ArrowRight size={15} weight="bold" />
-            </button>
-          </Tooltip>
+          {onQuickOut && (
+            <Tooltip title="Xuất kho hàng này">
+              <Button
+                size="small"
+                icon={<ArrowUp size={14} />}
+                disabled={record.quantity <= 0}
+                onClick={() => onQuickOut(record)}
+                className="bg-blue-600/20 text-blue-400 hover:bg-blue-600/40 border-blue-500/30 text-xs"
+              >
+                Xuất
+              </Button>
+            </Tooltip>
+          )}
         </div>
       ),
     },
   ];
 
   return (
-    <Table
-      loading={loading}
-      dataSource={ingredients}
-      columns={columns}
-      rowKey="id"
-      pagination={{
-        pageSize: 8,
-        showSizeChanger: false,
-        className: 'py-3 px-4',
-      }}
-      scroll={{ x: 'max-content' }}
-      className="border border-sushi-border rounded-2xl overflow-hidden shadow-sm"
-      locale={{
-        emptyText: (
-          <div className="py-14 flex flex-col items-center justify-center text-center">
-            <div className="w-14 h-14 rounded-2xl bg-sushi-surface border border-sushi-border flex items-center justify-center text-sushi-text-dim mb-3 shadow-inner">
-              <CookingPot size={26} />
-            </div>
-            <p className="text-sm font-semibold text-sushi-text">
-              {t('dashboard.noDataTitle')}
-            </p>
-            <p className="text-xs text-sushi-text-dim mt-1 max-w-sm leading-relaxed">
-              {t('dashboard.noIngredientsDesc')}
-            </p>
-          </div>
-        ),
-      }}
-    />
+    <div className="rounded-2xl border border-sushi-border overflow-hidden bg-sushi-card shadow-sm">
+      <Table
+        dataSource={balances}
+        columns={columns}
+        rowKey="id"
+        loading={loading}
+        pagination={{
+          pageSize: 10,
+          showSizeChanger: true,
+          className: 'px-4 py-2 select-none',
+        }}
+        scroll={{ x: 950 }}
+      />
+    </div>
   );
 }

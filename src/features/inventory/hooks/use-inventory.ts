@@ -2,66 +2,74 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { inventoryApi } from '../api/inventory.api';
-import { CreateIngredientInput, CreateTransactionInput, TransactionType } from '../types';
+import { StockReceiptInput, StockIssueInput } from '../types';
 import { message } from '@/components/ui';
 
 export const inventoryKeys = {
   all: ['inventory'] as const,
-  ingredients: () => [...inventoryKeys.all, 'ingredients'] as const,
-  alerts: () => [...inventoryKeys.all, 'alerts'] as const,
-  transactions: (type?: TransactionType) => [...inventoryKeys.all, 'transactions', type] as const,
+  balances: (params?: { warehouseId?: string; lowStockOnly?: boolean; search?: string }) =>
+    [...inventoryKeys.all, 'balances', params] as const,
+  warehouses: () => [...inventoryKeys.all, 'warehouses'] as const,
+  kpis: (warehouseId?: string) => [...inventoryKeys.all, 'kpis', warehouseId] as const,
+  documents: (warehouseId?: string) => [...inventoryKeys.all, 'documents', warehouseId] as const,
 };
 
-export function useIngredients() {
+export function useStockBalances(params?: {
+  warehouseId?: string;
+  lowStockOnly?: boolean;
+  search?: string;
+}) {
   return useQuery({
-    queryKey: inventoryKeys.ingredients(),
-    queryFn: () => inventoryApi.getIngredients(),
+    queryKey: inventoryKeys.balances(params),
+    queryFn: () => inventoryApi.getBalances(params),
+    refetchInterval: 10000, // Cập nhật lại sau 10s cho live demo
   });
 }
 
-export function useInventoryAlerts() {
+export function useWarehouses() {
   return useQuery({
-    queryKey: inventoryKeys.alerts(),
-    queryFn: () => inventoryApi.getAlerts(),
+    queryKey: inventoryKeys.warehouses(),
+    queryFn: () => inventoryApi.getWarehouses(),
   });
 }
 
-export function useInventoryTransactions(type?: TransactionType) {
+export function useDashboardKpis(warehouseId?: string) {
   return useQuery({
-    queryKey: inventoryKeys.transactions(type),
-    queryFn: () => inventoryApi.getTransactions(type),
+    queryKey: inventoryKeys.kpis(warehouseId),
+    queryFn: () => inventoryApi.getDashboardKpis(warehouseId),
+    refetchInterval: 10000,
   });
 }
 
-export function useCreateIngredient() {
+export function useRecordReceipt() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (dto: CreateIngredientInput) => inventoryApi.createIngredient(dto),
-    onSuccess: (data) => {
+    mutationFn: (dto: StockReceiptInput) => inventoryApi.recordReceipt(dto),
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: inventoryKeys.all });
-      message.success(`Thêm nguyên liệu "${data.name}" thành công!`);
+      message.success(`Nhập kho thành công! Mặt hàng "${data.productName}" đã tăng lên ${data.newBalance}`);
     },
-    onError: (err: unknown) => {
-      const msg = err instanceof Error ? err.message : 'Không thể tạo nguyên liệu';
-      message.error(msg);
+    onError: (err: any) => {
+      message.error(err?.message || 'Nhập kho thất bại');
     },
   });
 }
 
-export function useCreateTransaction() {
+export function useRecordIssue() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (dto: CreateTransactionInput) => inventoryApi.createTransaction(dto),
-    onSuccess: (data) => {
+    mutationFn: (dto: StockIssueInput) => inventoryApi.recordIssue(dto),
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: inventoryKeys.all });
-      const actionLabel = data.type === 'IN' ? 'Nhập kho' : 'Xuất kho';
-      message.success(`${actionLabel} thành công! Mã phiếu: ${data.code}`);
+      message.success(`Xuất kho thành công! Mặt hàng "${data.productName}" còn lại ${data.newBalance}`);
+      if (data.warning) {
+        message.warning(data.warning);
+      }
     },
-    onError: (err: unknown) => {
-      const msg = err instanceof Error ? err.message : 'Giao dịch kho thất bại';
-      message.error(msg);
+    onError: (err: any) => {
+      message.error(err?.message || 'Xuất kho thất bại');
     },
   });
 }

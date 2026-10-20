@@ -1,65 +1,69 @@
-export type TransactionType = 'IN' | 'OUT';
+export type StockStatus = 'HEALTHY' | 'LOW_STOCK' | 'OUT_OF_STOCK';
 
-export type TransactionReason =
-  | 'INITIAL_STOCK'
-  | 'PURCHASE'
-  | 'KITCHEN_USAGE'
-  | 'DISCARD_WASTE'
-  | 'ADJUSTMENT';
-
-export type StockAlertStatus = 'SAFE' | 'LOW_STOCK' | 'OUT_OF_STOCK';
-
-export interface Ingredient {
+export interface StockBalanceItem {
   id: string;
-  code: string;
-  name: string;
-  unit: string;
-  currentStock: number;
+  warehouseId: string;
+  warehouseName?: string;
+  productId: string;
+  productName: string;
+  productSku: string;
+  productBarcode?: string | null;
+  productImage?: string | null;
+  categoryName?: string;
+  unitName: string;
+  quantity: number;
   minStock: number;
-  costPrice: number;
-  status: StockAlertStatus;
-  isAlert: boolean;
-  isActive: boolean;
-  createdAt: string;
+  averageUnitCost: number;
+  status: StockStatus;
+  isLowStock: boolean;
   updatedAt: string;
-  _count?: {
-    transactions: number;
-  };
 }
 
-export interface InventoryTransaction {
+export interface StockReceiptInput {
+  warehouseId?: string;
+  productId: string;
+  quantity: number;
+  unitCost?: number;
+  note?: string;
+}
+
+export interface StockIssueInput {
+  warehouseId?: string;
+  productId: string;
+  quantity: number;
+  reason?: string;
+  note?: string;
+}
+
+export interface WarehouseItem {
   id: string;
   code: string;
-  type: TransactionType;
-  reason: TransactionReason;
-  ingredientId: string;
-  ingredient?: {
-    code: string;
-    name: string;
-    unit: string;
-  };
-  quantity: number;
-  unitPrice: number;
-  totalAmount: number;
-  note?: string | null;
-  createdBy?: string | null;
-  createdAt: string;
-}
-
-export interface CreateIngredientInput {
-  code: string;
   name: string;
-  unit: string;
-  costPrice: number;
-  minStock: number;
-  initialStock?: number;
+  isDefault: boolean;
+  isActive: boolean;
 }
 
-export interface CreateTransactionInput {
-  type: TransactionType;
-  reason: TransactionReason;
-  ingredientId: string;
-  quantity: number;
-  unitPrice?: number;
-  note?: string;
+export interface DashboardKpis {
+  totalProducts: number;
+  totalStockUnits: number;
+  lowStockCount: number;
+  outOfStockCount: number;
+  lowStockItems: Array<{
+    id: string;
+    name: string;
+    sku: string;
+    quantity: number;
+    minStock: number;
+    status: StockStatus;
+  }>;
+  recentMovements: Array<{
+    id: string;
+    code?: string;
+    type: 'IN' | 'OUT';
+    productName: string;
+    productSku: string;
+    unit: string;
+    quantity: number;
+    createdAt: string;
+  }>;
 }

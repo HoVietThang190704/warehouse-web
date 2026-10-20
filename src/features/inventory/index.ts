@@ -1,15 +1,13 @@
 export * from './types';
-export * from './schemas/inventory.schema';
 export { inventoryApi } from './api/inventory.api';
 export {
-  useIngredients,
-  useInventoryAlerts,
-  useInventoryTransactions,
-  useCreateIngredient,
-  useCreateTransaction,
+  useStockBalances,
+  useWarehouses,
+  useDashboardKpis,
+  useRecordReceipt,
+  useRecordIssue,
   inventoryKeys,
 } from './hooks/use-inventory';
 export { StockBalanceTable } from './components/stock-balance-table';
-export { StockTransactionTable } from './components/stock-transaction-table';
-export { CreateIngredientModal } from './components/create-ingredient-modal';
-export { CreateTransactionModal } from './components/create-transaction-modal';
+export { StockReceiptModal } from './components/stock-receipt-modal';
+export { StockIssueModal } from './components/stock-issue-modal';

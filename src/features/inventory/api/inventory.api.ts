@@ -1,30 +1,70 @@
 import { fetchApi } from '@/lib/api';
+import { API_ENDPOINTS } from '@/lib/endpoints';
 import {
-  Ingredient,
-  InventoryTransaction,
-  CreateIngredientInput,
-  CreateTransactionInput,
-  TransactionType,
+  StockBalanceItem,
+  StockReceiptInput,
+  StockIssueInput,
+  WarehouseItem,
+  DashboardKpis,
 } from '../types';
 
 export const inventoryApi = {
-  getIngredients: () => fetchApi<Ingredient[]>('/api/inventory/ingredients'),
-  getAlerts: () => fetchApi<Ingredient[]>('/api/inventory/alerts'),
-  createIngredient: (dto: CreateIngredientInput) =>
-    fetchApi<Ingredient>('/api/inventory/ingredients', {
-      method: 'POST',
-      body: JSON.stringify(dto),
-    }),
-  getTransactions: (type?: TransactionType, ingredientId?: string) => {
-    const params = new URLSearchParams();
-    if (type) params.set('type', type);
-    if (ingredientId) params.set('ingredientId', ingredientId);
-    const qs = params.toString();
-    return fetchApi<InventoryTransaction[]>(`/api/inventory/transactions${qs ? `?${qs}` : ''}`);
+  /**
+   * Lấy danh sách số dư tồn kho (kèm cờ cảnh báo tồn thấp)
+   */
+  getBalances: async (params?: {
+    warehouseId?: string;
+    lowStockOnly?: boolean;
+    search?: string;
+  }): Promise<StockBalanceItem[]> => {
+    const q = new URLSearchParams();
+    if (params?.warehouseId) q.append('warehouseId', params.warehouseId);
+    if (params?.lowStockOnly) q.append('lowStockOnly', 'true');
+    if (params?.search) q.append('search', params.search);
+    const queryString = q.toString() ? `?${q.toString()}` : '';
+    return fetchApi<StockBalanceItem[]>(`${API_ENDPOINTS.INVENTORY.BALANCES}${queryString}`);
   },
-  createTransaction: (dto: CreateTransactionInput) =>
-    fetchApi<InventoryTransaction>('/api/inventory/transactions', {
+
+  /**
+   * Nhập kho hàng hóa
+   */
+  recordReceipt: async (dto: StockReceiptInput) => {
+    return fetchApi(API_ENDPOINTS.INVENTORY.RECEIPTS, {
       method: 'POST',
       body: JSON.stringify(dto),
-    }),
+    });
+  },
+
+  /**
+   * Xuất kho hàng hóa (Chặn xuất âm)
+   */
+  recordIssue: async (dto: StockIssueInput) => {
+    return fetchApi(API_ENDPOINTS.INVENTORY.ISSUES, {
+      method: 'POST',
+      body: JSON.stringify(dto),
+    });
+  },
+
+  /**
+   * Lấy danh sách kho hoạt động
+   */
+  getWarehouses: async (): Promise<WarehouseItem[]> => {
+    return fetchApi<WarehouseItem[]>(API_ENDPOINTS.INVENTORY.WAREHOUSES);
+  },
+
+  /**
+   * Lấy KPIs tổng quan cho Dashboard
+   */
+  getDashboardKpis: async (warehouseId?: string): Promise<DashboardKpis> => {
+    const q = warehouseId ? `?warehouseId=${encodeURIComponent(warehouseId)}` : '';
+    return fetchApi<DashboardKpis>(`${API_ENDPOINTS.INVENTORY.KPIS}${q}`);
+  },
+
+  /**
+   * Lấy lịch sử chứng từ
+   */
+  getDocuments: async (warehouseId?: string) => {
+    const q = warehouseId ? `?warehouseId=${encodeURIComponent(warehouseId)}` : '';
+    return fetchApi(`${API_ENDPOINTS.INVENTORY.DOCUMENTS}${q}`);
+  },
 };
