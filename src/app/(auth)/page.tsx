@@ -10,7 +10,7 @@ export default function LoginPage() {
         <BrandShowcase />
       </div>
 
-      <div className="w-full lg:col-span-5 flex flex-col justify-center px-0 sm:px-6 lg:px-10 xl:px-14 py-0 sm:py-8 lg:py-12 -mt-6 lg:mt-0 relative z-20">
+      <div className="w-full lg:col-span-5 flex flex-col justify-center px-4 sm:px-6 lg:px-10 xl:px-14 py-4 sm:py-8 lg:py-12 -mt-6 lg:mt-0 relative z-20">
         <LoginForm />
       </div>
     </main>

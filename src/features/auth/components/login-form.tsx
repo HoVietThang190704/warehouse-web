@@ -49,16 +49,16 @@ export function LoginForm() {
   };
 
   return (
-    <div className="w-full max-w-[430px] sm:w-[430px] mx-auto">
+    <div className="w-full max-w-[380px] sm:max-w-[430px] mx-auto">
       {contextHolder}
 
       {/* Card Container dùng 100% token theme */}
-      <div className="relative rounded-3xl bg-sushi-card border border-sushi-border shadow-2xl backdrop-blur-xl p-8 sm:p-9 min-h-[500px] flex flex-col justify-between">
+      <div className="relative rounded-2xl sm:rounded-3xl bg-sushi-card border border-sushi-border shadow-2xl backdrop-blur-xl p-5 sm:p-8 md:p-9 flex flex-col justify-between">
         <div>
           {/* Top Header Bar */}
-          <div className="flex items-center justify-between mb-8 pb-5 border-b border-sushi-border h-14">
-            <div className="flex items-center space-x-3">
-              <div className="relative w-10 h-10 rounded-xl overflow-hidden border border-sushi-border flex items-center justify-center bg-sushi-surface shadow-md shrink-0">
+          <div className="flex items-center justify-between mb-6 pb-4 sm:mb-8 sm:pb-5 border-b border-sushi-border min-h-12 sm:h-14">
+            <div className="flex items-center space-x-2.5 sm:space-x-3 min-w-0">
+              <div className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl overflow-hidden border border-sushi-border flex items-center justify-center bg-sushi-surface shadow-md shrink-0">
                 <Image
                   src="/logo.png"
                   alt="Warehouse Platform Logo"
@@ -68,23 +68,23 @@ export function LoginForm() {
                   priority
                 />
               </div>
-              <div>
-                <div className="text-sushi-text font-bold text-sm tracking-wider font-sans leading-none">
+              <div className="min-w-0">
+                <div className="text-sushi-text font-bold text-xs sm:text-sm tracking-wider font-sans leading-none truncate">
                   WAREHOUSE PLATFORM
                 </div>
                 <div className="text-2xs font-mono tracking-wider uppercase text-sushi-text-muted mt-1 flex items-center space-x-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-sushi-emerald animate-pulse"></span>
-                  <span>LOGISTICS ONLINE</span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-sushi-emerald animate-pulse shrink-0"></span>
+                  <span className="truncate">LOGISTICS ONLINE</span>
                 </div>
               </div>
             </div>
 
             {/* Language Switcher */}
-            <div className="flex items-center p-0.5 rounded-full bg-sushi-surface border border-sushi-border text-xs shrink-0">
+            <div className="flex items-center p-0.5 rounded-full bg-sushi-surface border border-sushi-border text-xs shrink-0 ml-2">
               <button
                 type="button"
                 onClick={() => setLocale('vi')}
-                className={`w-[48px] py-1 rounded-full font-medium text-xs text-center transition-all cursor-pointer ${
+                className={`w-9 sm:w-[48px] py-1 rounded-full font-medium text-xs text-center transition-all cursor-pointer ${
                   locale === 'vi'
                     ? 'bg-sushi-primary text-sushi-text shadow-sm'
                     : 'text-sushi-text-muted hover:text-sushi-text'
@@ -95,7 +95,7 @@ export function LoginForm() {
               <button
                 type="button"
                 onClick={() => setLocale('en')}
-                className={`w-[48px] py-1 rounded-full font-medium text-xs text-center transition-all cursor-pointer ${
+                className={`w-9 sm:w-[48px] py-1 rounded-full font-medium text-xs text-center transition-all cursor-pointer ${
                   locale === 'en'
                     ? 'bg-sushi-primary text-sushi-text shadow-sm'
                     : 'text-sushi-text-muted hover:text-sushi-text'
@@ -107,8 +107,8 @@ export function LoginForm() {
           </div>
 
           {/* Title Area */}
-          <div className="mb-7 h-8 flex items-center">
-            <h2 className="text-2xl font-bold text-sushi-text tracking-tight font-sans">
+          <div className="mb-5 sm:mb-7 flex items-center">
+            <h2 className="text-xl sm:text-2xl font-bold text-sushi-text tracking-tight font-sans">
               {t('auth.loginTitle')}
             </h2>
           </div>
@@ -131,12 +131,12 @@ export function LoginForm() {
                 </span>
               }
               rules={[createZodRule(loginSchema, 'email')]}
-              style={{ marginBottom: 18 }}
+              style={{ marginBottom: 16 }}
             >
               <Input
                 prefix={<EnvelopeSimple size={18} className="text-sushi-text-dim mr-2 shrink-0" />}
                 placeholder={t('auth.emailPlaceholder')}
-                className="h-12 rounded-xl"
+                className="h-11 sm:h-12 rounded-xl"
               />
             </Form.Item>
 
@@ -151,12 +151,12 @@ export function LoginForm() {
                 </div>
               }
               rules={[createZodRule(loginSchema, 'password')]}
-              style={{ marginBottom: 26 }}
+              style={{ marginBottom: 22 }}
             >
               <Input.Password
                 prefix={<LockSimple size={18} className="text-sushi-text-dim mr-2 shrink-0" />}
                 placeholder={t('auth.passwordPlaceholder')}
-                className="h-12 rounded-xl"
+                className="h-11 sm:h-12 rounded-xl"
                 visibilityToggle={{
                   visible: showPassword,
                   onVisibleChange: setShowPassword,
@@ -189,7 +189,7 @@ export function LoginForm() {
                 htmlType="submit"
                 loading={loading}
                 block
-                className="h-12 rounded-xl"
+                className="h-11 sm:h-12 rounded-xl"
               >
                 {loading ? t('auth.authenticating') : t('auth.loginButton')}
               </SushiButton>
@@ -198,9 +198,9 @@ export function LoginForm() {
         </div>
 
         {/* Security badge footer */}
-        <div className="mt-6 pt-5 border-t border-sushi-border flex items-center justify-center space-x-2 text-2xs text-sushi-text-dim font-sans text-center">
+        <div className="mt-5 pt-4 sm:mt-6 sm:pt-5 border-t border-sushi-border flex items-center justify-center space-x-2 text-2xs text-sushi-text-dim font-sans text-center">
           <ShieldCheck size={16} className="text-sushi-emerald shrink-0" />
-          <span className="whitespace-nowrap">{t('auth.cookieSecurityNotice')}</span>
+          <span className="truncate">{t('auth.cookieSecurityNotice')}</span>
         </div>
       </div>
     </div>
