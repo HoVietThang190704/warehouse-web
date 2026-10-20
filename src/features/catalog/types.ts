@@ -1,4 +1,9 @@
-export type { CreateCategoryInput, CreateProductInput } from './schemas/catalog.schema';
+export type {
+  CreateCategoryInput,
+  CreateProductInput,
+  UpdateCategoryInput,
+  UpdateProductInput,
+} from './schemas/catalog.schema';
 
 export interface Unit {
   id: string;
@@ -11,6 +16,7 @@ export interface Category {
   id: string;
   name: string;
   createdAt?: string;
+  products?: Product[];
   _count?: {
     products: number;
   };

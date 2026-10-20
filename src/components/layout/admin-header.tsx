@@ -106,30 +106,30 @@ export function AdminHeader({ onOpenMobileMenu, className }: AdminHeaderProps) {
 
   return (
     <Header
-      className={`border-b border-sushi-border/80 px-4 sm:px-6 flex items-center justify-between sticky top-0 z-10 select-none ${className || ''}`}
+      className={`border-b border-sushi-border/80 !px-3 sm:!px-6 flex items-center justify-between sticky top-0 z-10 select-none ${className || ''}`}
       style={{
         background: SUSHICOLORS.card,
-        height: 64,
+        height: 60,
         lineHeight: 'normal',
       }}
     >
       {/* =========================================================================
           1. Left: Mobile Brand / Desktop Breadcrumbs
          ========================================================================= */}
-      <div className="flex items-center space-x-2.5 sm:space-x-3 min-w-0">
+      <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
         {/* Mobile: Hamburger Button */}
         <button
           type="button"
           onClick={onOpenMobileMenu}
-          className="md:hidden w-9 h-9 rounded-xl flex items-center justify-center text-sushi-text-muted hover:text-white hover:bg-sushi-surface border border-sushi-border/70 shrink-0 cursor-pointer transition-colors"
+          className="md:hidden w-9 h-9 rounded-xl flex items-center justify-center text-sushi-text-muted hover:text-white bg-sushi-surface/60 hover:bg-sushi-surface border border-sushi-border/80 shrink-0 cursor-pointer transition-all active:scale-95 shadow-xs"
           aria-label="Open mobile menu"
         >
-          <ListIcon size={18} />
+          <ListIcon size={19} />
         </button>
 
         {/* Mobile: Logo & Brand Name */}
-        <div className="flex md:hidden items-center space-x-2">
-          <div className="relative w-7 h-7 rounded-lg overflow-hidden border border-sushi-border flex items-center justify-center shrink-0 bg-sushi-surface shadow-sm">
+        <div className="flex md:hidden items-center gap-2">
+          <div className="relative w-8 h-8 rounded-xl overflow-hidden border border-sushi-border/80 flex items-center justify-center shrink-0 bg-white/95 shadow-xs p-0.5">
             <Image
               src="/logo.png"
               alt="Logo"
@@ -138,9 +138,14 @@ export function AdminHeader({ onOpenMobileMenu, className }: AdminHeaderProps) {
               className="object-contain"
             />
           </div>
-          <span className="font-bold text-sushi-text tracking-wider text-xs font-sans">
-            WAREHOUSE
-          </span>
+          <div className="flex flex-col">
+            <span className="font-extrabold text-sushi-text tracking-wider text-xs font-sans leading-tight">
+              WAREHOUSE
+            </span>
+            <span className="text-[10px] font-mono text-sushi-text-dim tracking-tight leading-none">
+              PLATFORM
+            </span>
+          </div>
         </div>
 
         {/* Desktop: Breadcrumbs */}
@@ -194,11 +199,11 @@ export function AdminHeader({ onOpenMobileMenu, className }: AdminHeaderProps) {
         >
           <button
             type="button"
-            className="flex items-center space-x-2 sm:space-x-2.5 p-1 sm:px-3 sm:py-1.5 rounded-xl bg-sushi-surface/70 border border-sushi-border/70 hover:bg-sushi-surface hover:border-sushi-border transition-all duration-200 cursor-pointer shadow-sm group focus:outline-none focus:ring-1 focus:ring-sushi-primary/40"
+            className="flex items-center gap-2 p-0.5 md:px-3 md:py-1.5 rounded-full md:rounded-xl md:bg-sushi-surface/70 md:border md:border-sushi-border/70 hover:bg-sushi-surface transition-all duration-200 cursor-pointer shadow-xs group focus:outline-none focus:ring-1 focus:ring-sushi-primary/40 active:scale-95"
             aria-label="User menu"
           >
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-sushi-primary to-amber-500 p-[1px] shadow-sm flex items-center justify-center shrink-0">
-              <div className="w-full h-full rounded-full bg-sushi-surface flex items-center justify-center text-xs font-bold text-sushi-text">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-sushi-primary to-amber-500 p-[1.5px] shadow-xs flex items-center justify-center shrink-0">
+              <div className="w-full h-full rounded-full bg-sushi-surface flex items-center justify-center text-xs font-bold text-sushi-text group-hover:text-white transition-colors">
                 {userInitial}
               </div>
             </div>

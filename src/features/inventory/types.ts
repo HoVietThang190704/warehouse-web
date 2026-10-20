@@ -35,6 +35,26 @@ export interface StockIssueInput {
   note?: string;
 }
 
+export interface StockReceiptResult {
+  success: boolean;
+  documentCode: string;
+  productId: string;
+  productName: string;
+  quantityAdded: number;
+  newBalance: number;
+}
+
+export interface StockIssueResult {
+  success: boolean;
+  documentCode: string;
+  productId: string;
+  productName: string;
+  quantityIssued: number;
+  newBalance: number;
+  isLowStock?: boolean;
+  warning?: string | null;
+}
+
 export interface WarehouseItem {
   id: string;
   code: string;
@@ -64,6 +84,48 @@ export interface DashboardKpis {
     productSku: string;
     unit: string;
     quantity: number;
+    performerName?: string;
     createdAt: string;
   }>;
+}
+
+export type StockDocumentType =
+  | 'PURCHASE_RECEIPT'
+  | 'MANUAL_IN'
+  | 'MANUAL_OUT'
+  | 'SALES_ISSUE'
+  | 'OPENING_BALANCE'
+  | 'ADJUSTMENT';
+
+export interface StockDocumentDetailItem {
+  id: string;
+  productId: string;
+  quantity: number;
+  unitCost: number;
+  lineTotal: number;
+  product?: {
+    name: string;
+    sku: string;
+    baseUnit?: {
+      name: string;
+    };
+  };
+}
+
+export interface StockDocumentItem {
+  id: string;
+  code: string;
+  type: StockDocumentType;
+  status: string;
+  note?: string | null;
+  warehouseId: string;
+  createdBy?: string | null;
+  creatorName: string;
+  postedBy?: string | null;
+  posterName: string;
+  createdAt: string;
+  postedAt?: string | null;
+  totalQuantity: number;
+  totalAmount: number;
+  items: StockDocumentDetailItem[];
 }

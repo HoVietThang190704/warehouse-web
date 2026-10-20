@@ -2,7 +2,12 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { inventoryApi } from '../api/inventory.api';
-import { StockReceiptInput, StockIssueInput } from '../types';
+import {
+  StockReceiptInput,
+  StockIssueInput,
+  StockReceiptResult,
+  StockIssueResult,
+} from '../types';
 import { message } from '@/components/ui';
 
 export const inventoryKeys = {
@@ -41,17 +46,26 @@ export function useDashboardKpis(warehouseId?: string) {
   });
 }
 
+export function useStockDocuments(warehouseId?: string) {
+  return useQuery({
+    queryKey: inventoryKeys.documents(warehouseId),
+    queryFn: () => inventoryApi.getDocuments(warehouseId),
+    refetchInterval: 10000,
+  });
+}
+
 export function useRecordReceipt() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (dto: StockReceiptInput) => inventoryApi.recordReceipt(dto),
-    onSuccess: (data: any) => {
+    onSuccess: (data: StockReceiptResult) => {
       queryClient.invalidateQueries({ queryKey: inventoryKeys.all });
       message.success(`Nhập kho thành công! Mặt hàng "${data.productName}" đã tăng lên ${data.newBalance}`);
     },
-    onError: (err: any) => {
-      message.error(err?.message || 'Nhập kho thất bại');
+    onError: (err: unknown) => {
+      const msg = err instanceof Error ? err.message : 'Nhập kho thất bại';
+      message.error(msg);
     },
   });
 }
@@ -61,15 +75,16 @@ export function useRecordIssue() {
 
   return useMutation({
     mutationFn: (dto: StockIssueInput) => inventoryApi.recordIssue(dto),
-    onSuccess: (data: any) => {
+    onSuccess: (data: StockIssueResult) => {
       queryClient.invalidateQueries({ queryKey: inventoryKeys.all });
       message.success(`Xuất kho thành công! Mặt hàng "${data.productName}" còn lại ${data.newBalance}`);
       if (data.warning) {
         message.warning(data.warning);
       }
     },
-    onError: (err: any) => {
-      message.error(err?.message || 'Xuất kho thất bại');
+    onError: (err: unknown) => {
+      const msg = err instanceof Error ? err.message : 'Xuất kho thất bại';
+      message.error(msg);
     },
   });
 }

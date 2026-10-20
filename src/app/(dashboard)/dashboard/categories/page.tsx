@@ -11,8 +11,12 @@ import {
 import {
   CategoryTable,
   CreateCategoryModal,
+  EditCategoryModal,
   useCategories,
   useCreateCategory,
+  useUpdateCategory,
+  useDeleteCategory,
+  Category,
 } from '@/features/catalog';
 import { useTranslation } from '@/lib/i18n';
 
@@ -20,7 +24,11 @@ export default function CategoriesPage() {
   const { t } = useTranslation();
   const { data: categories = [], isLoading } = useCategories();
   const createMutation = useCreateCategory();
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const updateMutation = useUpdateCategory();
+  const deleteMutation = useDeleteCategory();
+
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [search, setSearch] = useState('');
 
   // Lọc danh mục theo từ khóa tìm kiếm
@@ -39,7 +47,7 @@ export default function CategoriesPage() {
           <SushiButton
             type="primary"
             icon={<Plus size={16} weight="bold" />}
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => setIsCreateModalOpen(true)}
           >
             {t('dashboard.addCategory')}
           </SushiButton>
@@ -70,14 +78,28 @@ export default function CategoriesPage() {
       <CategoryTable
         categories={filteredCategories}
         loading={isLoading}
+        onEdit={(cat) => setEditingCategory(cat)}
+        onDelete={async (cat) => {
+          await deleteMutation.mutateAsync(cat.id);
+        }}
       />
 
       {/* Modal Tạo Danh Mục Mới */}
       <CreateCategoryModal
-        open={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        open={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
         onSubmit={async (dto) => {
           await createMutation.mutateAsync(dto);
+        }}
+      />
+
+      {/* Modal Sửa Danh Mục */}
+      <EditCategoryModal
+        open={Boolean(editingCategory)}
+        category={editingCategory}
+        onClose={() => setEditingCategory(null)}
+        onSubmit={async (id, dto) => {
+          await updateMutation.mutateAsync({ id, dto });
         }}
       />
     </div>

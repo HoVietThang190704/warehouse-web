@@ -29,3 +29,31 @@ export const createProductSchema = z.object({
 });
 
 export type CreateProductInput = z.infer<typeof createProductSchema>;
+
+export const updateCategorySchema = z.object({
+  name: z
+    .string()
+    .min(1, 'Vui lòng nhập tên danh mục!')
+    .min(2, 'Tên danh mục phải có ít nhất 2 ký tự')
+    .max(100, 'Tên danh mục không được vượt quá 100 ký tự'),
+});
+
+export type UpdateCategoryInput = z.infer<typeof updateCategorySchema>;
+
+export const updateProductSchema = z.object({
+  name: z
+    .string()
+    .min(2, 'Tên hàng hóa phải có ít nhất 2 ký tự')
+    .max(160, 'Tên hàng hóa không được vượt quá 160 ký tự'),
+  sku: z.string().max(60).optional(),
+  barcode: z.string().max(100).optional().or(z.literal('')),
+  categoryId: z.string().uuid().optional().or(z.literal('')),
+  baseUnitId: z.string().uuid().optional().or(z.literal('')),
+  minStock: z.coerce.number().min(0).optional(),
+  costPrice: z.coerce.number().min(0).optional(),
+  sellingPrice: z.coerce.number().min(0).optional(),
+  imageUrl: z.string().optional().or(z.literal('')),
+  isActive: z.boolean().optional(),
+});
+
+export type UpdateProductInput = z.infer<typeof updateProductSchema>;

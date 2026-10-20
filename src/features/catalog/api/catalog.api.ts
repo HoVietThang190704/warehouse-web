@@ -1,6 +1,14 @@
 import { fetchApi, getApiBaseUrl } from '@/lib/api';
 import { API_ENDPOINTS } from '@/lib/endpoints';
-import { Category, CreateCategoryInput, Product, CreateProductInput, Unit } from '../types';
+import {
+  Category,
+  CreateCategoryInput,
+  UpdateCategoryInput,
+  Product,
+  CreateProductInput,
+  UpdateProductInput,
+  Unit,
+} from '../types';
 
 export const catalogApi = {
   /**
@@ -8,6 +16,32 @@ export const catalogApi = {
    */
   getCategories: async (): Promise<Category[]> => {
     return fetchApi<Category[]>(API_ENDPOINTS.CATALOG.CATEGORIES);
+  },
+
+  /**
+   * Lấy chi tiết nhóm hàng theo ID
+   */
+  getCategoryById: async (id: string): Promise<Category> => {
+    return fetchApi<Category>(API_ENDPOINTS.CATALOG.CATEGORY_BY_ID(id));
+  },
+
+  /**
+   * Cập nhật nhóm hàng
+   */
+  updateCategory: async (id: string, dto: UpdateCategoryInput): Promise<Category> => {
+    return fetchApi<Category>(API_ENDPOINTS.CATALOG.CATEGORY_BY_ID(id), {
+      method: 'PUT',
+      body: JSON.stringify(dto),
+    });
+  },
+
+  /**
+   * Xóa nhóm hàng rỗng
+   */
+  deleteCategory: async (id: string): Promise<{ success: boolean; message?: string }> => {
+    return fetchApi<{ success: boolean; message?: string }>(API_ENDPOINTS.CATALOG.CATEGORY_BY_ID(id), {
+      method: 'DELETE',
+    });
   },
 
   /**
@@ -51,6 +85,16 @@ export const catalogApi = {
   createProduct: async (dto: CreateProductInput): Promise<Product> => {
     return fetchApi<Product>(API_ENDPOINTS.CATALOG.PRODUCTS, {
       method: 'POST',
+      body: JSON.stringify(dto),
+    });
+  },
+
+  /**
+   * Cập nhật hàng hóa
+   */
+  updateProduct: async (id: string, dto: UpdateProductInput): Promise<Product> => {
+    return fetchApi<Product>(API_ENDPOINTS.CATALOG.PRODUCT_BY_ID(id), {
+      method: 'PUT',
       body: JSON.stringify(dto),
     });
   },

@@ -20,12 +20,19 @@ interface StockReceiptModalProps {
   preselectedItem?: StockBalanceItem | null;
 }
 
+interface StockReceiptFormValues {
+  productId: string;
+  quantity: number;
+  unitCost?: number;
+  note?: string;
+}
+
 export function StockReceiptModal({
   open,
   onClose,
   preselectedItem,
 }: StockReceiptModalProps) {
-  const [form] = Form.useForm();
+  const [form] = Form.useForm<StockReceiptFormValues>();
   const { data: products = [] } = useProducts();
   const receiptMutation = useRecordReceipt();
 
@@ -34,7 +41,7 @@ export function StockReceiptModal({
     label: `${p.name} (SKU: ${p.sku})`,
   }));
 
-  const handleFinish = async (values: any) => {
+  const handleFinish = async (values: StockReceiptFormValues) => {
     try {
       await receiptMutation.mutateAsync({
         productId: values.productId,
@@ -53,6 +60,7 @@ export function StockReceiptModal({
     <Modal
       title="Tạo Phiếu Nhập Kho Hàng Hóa"
       open={open}
+      centered
       onCancel={() => {
         form.resetFields();
         onClose();

@@ -12,9 +12,12 @@ import {
 import {
   ProductTable,
   CreateProductModal,
+  EditProductModal,
   useProducts,
   useCreateProduct,
+  useUpdateProduct,
   useCategoryOptions,
+  Product,
 } from '@/features/catalog';
 import { useTranslation } from '@/lib/i18n';
 
@@ -22,12 +25,14 @@ export default function ProductsPage() {
   const { t } = useTranslation();
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | undefined>();
   const [search, setSearch] = useState('');
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
   // TanStack Query Hooks
   const { options: categoryOptions } = useCategoryOptions();
   const { data: products = [], isLoading } = useProducts(selectedCategoryId);
   const createProductMutation = useCreateProduct();
+  const updateProductMutation = useUpdateProduct();
 
   // Bộ lọc kết hợp: Từ khóa (tên, SKU, barcode)
   const filteredProducts = useMemo(() => {
@@ -52,7 +57,7 @@ export default function ProductsPage() {
           <SushiButton
             type="primary"
             icon={<Plus size={16} weight="bold" />}
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => setIsCreateModalOpen(true)}
             className="bg-blue-600 hover:bg-blue-500 font-semibold"
           >
             Thêm Hàng Hóa Mới
@@ -98,14 +103,25 @@ export default function ProductsPage() {
       <ProductTable
         products={filteredProducts}
         loading={isLoading}
+        onEdit={(prod) => setEditingProduct(prod)}
       />
 
       {/* Modal Thêm Mới Sản Phẩm */}
       <CreateProductModal
-        open={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        open={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
         onSubmit={async (dto) => {
           await createProductMutation.mutateAsync(dto);
+        }}
+      />
+
+      {/* Modal Chỉnh Sửa Sản Phẩm */}
+      <EditProductModal
+        open={Boolean(editingProduct)}
+        product={editingProduct}
+        onClose={() => setEditingProduct(null)}
+        onSubmit={async (id, dto) => {
+          await updateProductMutation.mutateAsync({ id, dto });
         }}
       />
     </div>

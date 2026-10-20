@@ -19,12 +19,19 @@ interface StockIssueModalProps {
   preselectedItem?: StockBalanceItem | null;
 }
 
+interface StockIssueFormValues {
+  productId: string;
+  quantity: number;
+  reason?: string;
+  note?: string;
+}
+
 export function StockIssueModal({
   open,
   onClose,
   preselectedItem,
 }: StockIssueModalProps) {
-  const [form] = Form.useForm();
+  const [form] = Form.useForm<StockIssueFormValues>();
   const { data: balances = [] } = useStockBalances();
   const issueMutation = useRecordIssue();
 
@@ -54,7 +61,7 @@ export function StockIssueModal({
     label: `${b.productName} (SKU: ${b.productSku}) — Tồn: ${b.quantity} ${b.unitName}`,
   }));
 
-  const handleFinish = async (values: any) => {
+  const handleFinish = async (values: StockIssueFormValues) => {
     if (isOverStock) {
       message.error(`Không thể xuất quá số lượng tồn kho khả dụng (${availableQty})`);
       return;
@@ -78,6 +85,7 @@ export function StockIssueModal({
     <Modal
       title="Tạo Phiếu Xuất Kho Hàng Hóa"
       open={open}
+      centered
       onCancel={() => {
         form.resetFields();
         onClose();

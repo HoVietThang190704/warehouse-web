@@ -10,16 +10,21 @@ import {
   ArrowDown,
   ArrowUp,
   WarningCircle,
+  Package,
+  Receipt,
 } from '@/components/ui';
 import {
   StockBalanceTable,
+  StockHistoryTable,
   StockReceiptModal,
   StockIssueModal,
   useStockBalances,
+  useStockDocuments,
   StockBalanceItem,
 } from '@/features/inventory';
 
 export default function InventoryPage() {
+  const [activeTab, setActiveTab] = useState<'balance' | 'history'>('balance');
   const [search, setSearch] = useState('');
   const [lowStockOnly, setLowStockOnly] = useState(false);
 
@@ -27,10 +32,12 @@ export default function InventoryPage() {
   const [issueModalOpen, setIssueModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<StockBalanceItem | null>(null);
 
-  const { data: balances = [], isLoading } = useStockBalances({
+  const { data: balances = [], isLoading: balancesLoading } = useStockBalances({
     lowStockOnly,
     search,
   });
+
+  const { data: documents = [], isLoading: documentsLoading } = useStockDocuments();
 
   // Calculate quick summary metrics
   const totalStockUnits = useMemo(() => {
@@ -54,8 +61,8 @@ export default function InventoryPage() {
   return (
     <div className="space-y-5">
       <SushiPageHeader
-        title="Sổ Theo Dõi Tồn Kho"
-        subtitle="Giám sát số lượng tồn kho theo thời gian thực, cảnh báo hụt hàng và thao tác xuất nhập"
+        title="Quản Lý Kho & Sổ Tồn"
+        subtitle="Giám sát tồn kho thực tế, truy vết người thực hiện nhập/xuất và tự động cảnh báo hụt hàng"
         extra={
           <div className="flex items-center space-x-2.5">
             <SushiButton
@@ -84,59 +91,99 @@ export default function InventoryPage() {
         }
       />
 
-      {/* Filter and Quick Stats Toolbar */}
-      <div className="p-4 rounded-2xl bg-sushi-card border border-sushi-border flex flex-col md:flex-row gap-3 items-center justify-between shadow-sm">
-        <div className="flex flex-col sm:flex-row gap-3 items-center w-full md:w-auto flex-1">
-          {/* Ô Tìm kiếm */}
-          <div className="w-full sm:w-80">
-            <Input
-              prefix={<MagnifyingGlass size={16} className="text-sushi-text-dim" />}
-              placeholder="Tìm theo tên hàng, mã SKU, barcode..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              allowClear
-              className="w-full"
-            />
-          </div>
+      {/* Tabs Chuyển đổi giữa Sổ tồn và Lịch sử nhập xuất */}
+      <div className="flex items-center space-x-2 border-b border-sushi-border pb-3">
+        <button
+          type="button"
+          onClick={() => setActiveTab('balance')}
+          className={`px-4 py-2.5 rounded-xl text-xs font-semibold transition-all flex items-center space-x-2 cursor-pointer ${
+            activeTab === 'balance'
+              ? 'bg-blue-600 text-white shadow-md'
+              : 'bg-sushi-card border border-sushi-border text-sushi-text-muted hover:text-white hover:bg-sushi-surface'
+          }`}
+        >
+          <Package size={16} weight={activeTab === 'balance' ? 'fill' : 'regular'} />
+          <span>Sổ Tồn Kho Thực Tế ({balances.length})</span>
+        </button>
 
-          {/* Toggle Lọc hàng sắp hết */}
-          <div className="flex items-center space-x-2.5 px-3 py-1.5 rounded-xl bg-sushi-surface border border-sushi-border self-start sm:self-auto cursor-pointer">
-            <Switch
-              checked={lowStockOnly}
-              onChange={setLowStockOnly}
-              className={lowStockOnly ? 'bg-amber-500' : ''}
-            />
-            <span
-              onClick={() => setLowStockOnly(!lowStockOnly)}
-              className="text-xs font-semibold text-sushi-text select-none flex items-center space-x-1.5"
-            >
-              <WarningCircle size={15} className="text-amber-400" />
-              <span>Chỉ hiện hàng sắp hết (&le; 5)</span>
-            </span>
-          </div>
-        </div>
-
-        {/* Quick Summary Pill */}
-        <div className="flex items-center space-x-4 text-xs font-mono self-end md:self-auto">
-          <div>
-            Tổng tồn: <strong className="text-white text-sm">{totalStockUnits}</strong> đơn vị
-          </div>
-          {lowStockCount > 0 && (
-            <div className="px-2.5 py-1 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 font-semibold flex items-center space-x-1 animate-pulse">
-              <span>⚠️ Cần nhập:</span>
-              <span className="text-sm">{lowStockCount}</span>
-            </div>
-          )}
-        </div>
+        <button
+          type="button"
+          onClick={() => setActiveTab('history')}
+          className={`px-4 py-2.5 rounded-xl text-xs font-semibold transition-all flex items-center space-x-2 cursor-pointer ${
+            activeTab === 'history'
+              ? 'bg-blue-600 text-white shadow-md'
+              : 'bg-sushi-card border border-sushi-border text-sushi-text-muted hover:text-white hover:bg-sushi-surface'
+          }`}
+        >
+          <Receipt size={16} weight={activeTab === 'history' ? 'fill' : 'regular'} />
+          <span>Lịch Sử Nhập / Xuất Hàng ({documents.length})</span>
+        </button>
       </div>
 
-      {/* Table Sổ Tồn Kho */}
-      <StockBalanceTable
-        balances={balances}
-        loading={isLoading}
-        onQuickIn={handleQuickIn}
-        onQuickOut={handleQuickOut}
-      />
+      {activeTab === 'balance' ? (
+        <>
+          {/* Filter and Quick Stats Toolbar */}
+          <div className="p-4 rounded-2xl bg-sushi-card border border-sushi-border flex flex-col md:flex-row gap-3 items-center justify-between shadow-sm">
+            <div className="flex flex-col sm:flex-row gap-3 items-center w-full md:w-auto flex-1">
+              {/* Ô Tìm kiếm */}
+              <div className="w-full sm:w-80">
+                <Input
+                  prefix={<MagnifyingGlass size={16} className="text-sushi-text-dim" />}
+                  placeholder="Tìm theo tên hàng, mã SKU, barcode..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  allowClear
+                  className="w-full"
+                />
+              </div>
+
+              {/* Toggle Lọc hàng sắp hết */}
+              <div className="flex items-center space-x-2.5 px-3 py-1.5 rounded-xl bg-sushi-surface border border-sushi-border self-start sm:self-auto cursor-pointer">
+                <Switch
+                  checked={lowStockOnly}
+                  onChange={setLowStockOnly}
+                  className={lowStockOnly ? 'bg-amber-500' : ''}
+                />
+                <span
+                  onClick={() => setLowStockOnly(!lowStockOnly)}
+                  className="text-xs font-semibold text-sushi-text select-none flex items-center space-x-1.5"
+                >
+                  <WarningCircle size={15} className="text-amber-400" />
+                  <span>Chỉ hiện hàng sắp hết (&le; 5)</span>
+                </span>
+              </div>
+            </div>
+
+            {/* Quick Summary Pill */}
+            <div className="flex items-center space-x-4 text-xs font-mono self-end md:self-auto">
+              <div>
+                Tổng tồn: <strong className="text-white text-sm">{totalStockUnits}</strong> đơn vị
+              </div>
+              {lowStockCount > 0 && (
+                <div className="px-2.5 py-1 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 font-semibold flex items-center space-x-1.5 animate-pulse">
+                  <WarningCircle size={14} className="text-amber-400 shrink-0" />
+                  <span>Cần nhập:</span>
+                  <span className="text-sm">{lowStockCount}</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Table Sổ Tồn Kho */}
+          <StockBalanceTable
+            balances={balances}
+            loading={balancesLoading}
+            onQuickIn={handleQuickIn}
+            onQuickOut={handleQuickOut}
+          />
+        </>
+      ) : (
+        /* Table Lịch Sử Nhập / Xuất Chứng Từ */
+        <StockHistoryTable
+          documents={documents}
+          loading={documentsLoading}
+        />
+      )}
 
       {/* Modals */}
       <StockReceiptModal

@@ -179,30 +179,28 @@ export function StockBalanceTable({
       render: (_: unknown, record: StockBalanceItem) => (
         <div className="flex items-center justify-end space-x-2">
           {onQuickIn && (
-            <Tooltip title="Nhập thêm hàng vào kho">
-              <Button
-                size="small"
-                icon={<ArrowDown size={14} />}
-                onClick={() => onQuickIn(record)}
-                className="bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/40 border-emerald-500/30 text-xs"
-              >
-                Nhập
-              </Button>
-            </Tooltip>
+            <Button
+              size="small"
+              icon={<ArrowDown size={14} />}
+              onClick={() => onQuickIn(record)}
+              className="bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/40 border-emerald-500/30 text-xs"
+              title="Nhập thêm hàng vào kho"
+            >
+              Nhập
+            </Button>
           )}
 
           {onQuickOut && (
-            <Tooltip title="Xuất kho hàng này">
-              <Button
-                size="small"
-                icon={<ArrowUp size={14} />}
-                disabled={record.quantity <= 0}
-                onClick={() => onQuickOut(record)}
-                className="bg-blue-600/20 text-blue-400 hover:bg-blue-600/40 border-blue-500/30 text-xs"
-              >
-                Xuất
-              </Button>
-            </Tooltip>
+            <Button
+              size="small"
+              icon={<ArrowUp size={14} />}
+              disabled={record.quantity <= 0}
+              onClick={() => onQuickOut(record)}
+              className="bg-blue-600/20 text-blue-400 hover:bg-blue-600/40 border-blue-500/30 text-xs"
+              title="Xuất kho hàng này"
+            >
+              Xuất
+            </Button>
           )}
         </div>
       ),

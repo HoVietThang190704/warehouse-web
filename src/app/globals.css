@@ -51,6 +51,22 @@ body {
   background-color: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
+  overflow-x: clip;
+}
+
+/* Chống tự động phóng to (auto-zoom) trên iOS Safari/Chrome khi focus vào ô nhập liệu
+   Trình duyệt iOS tự động zoom màn hình nếu kích thước chữ input nhỏ hơn 16px */
+@media (max-width: 768px) {
+  input,
+  textarea,
+  select,
+  .ant-input,
+  .ant-input-number-input,
+  .ant-select-selection-search-input,
+  .ant-select-selection-item,
+  .ant-select-selection-placeholder {
+    font-size: 16px !important;
+  }
 }
 
 /* Đảm bảo text gợi ý (placeholder) sáng rõ, tương phản tốt, không bị chìm tối */
@@ -71,6 +87,160 @@ input:-webkit-autofill:active {
   -webkit-box-shadow: 0 0 0 1000px #1e1e22 inset !important;
   box-shadow: 0 0 0 1000px #1e1e22 inset !important;
   transition: background-color 5000s ease-in-out 0s !important;
+}
+
+/* =============================================================================
+   Ant Design Dark Mode Overrides (Alerts, Disabled Inputs & Selects)
+   Đảm bảo chữ sáng rõ, tương phản cao trên nền tối, không bị chìm hay mờ
+   ============================================================================= */
+.ant-input[disabled],
+.ant-input-disabled,
+.ant-input-number-disabled,
+.ant-input-number-disabled input,
+.ant-select-disabled.ant-select:not(.ant-select-customize-input) .ant-select-selector {
+  background-color: #0f172a !important; /* slate-900 */
+  color: #cbd5e1 !important; /* slate-300 - sáng rõ, dễ đọc */
+  -webkit-text-fill-color: #cbd5e1 !important;
+  border-color: #334155 !important;
+  cursor: not-allowed !important;
+}
+
+.ant-select-disabled .ant-select-selection-item {
+  color: #cbd5e1 !important;
+  -webkit-text-fill-color: #cbd5e1 !important;
+}
+
+.ant-alert {
+  background-color: rgba(30, 41, 59, 0.7) !important;
+  border: 1px solid #334155 !important;
+  border-radius: 12px !important;
+}
+
+.ant-alert-info {
+  background-color: rgba(37, 99, 235, 0.15) !important;
+  border-color: rgba(37, 99, 235, 0.4) !important;
+}
+
+.ant-alert-info .ant-alert-message {
+  color: #93c5fd !important; /* blue-300 */
+  font-weight: 600 !important;
+}
+
+.ant-alert-info .ant-alert-description {
+  color: #e2e8f0 !important; /* slate-200 */
+}
+
+.ant-alert-info .ant-alert-icon {
+  color: #60a5fa !important;
+}
+
+/* =============================================================================
+   Ant Design Modal Responsive & Scroll Optimization
+   Đảm bảo Modal hiển thị hoàn hảo trên Mobile, không tràn màn hình, nội dung cuộn mượt
+   ============================================================================= */
+.ant-modal {
+  max-width: calc(100vw - 24px) !important;
+}
+
+.ant-modal .ant-modal-content {
+  background-color: #1e293b !important; /* sushi-card */
+  border: 1px solid #334155 !important; /* sushi-border */
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7) !important;
+  max-height: calc(100dvh - 32px) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 24px !important;
+  border-radius: 20px !important;
+}
+
+.ant-modal .ant-modal-header {
+  background-color: transparent !important;
+  margin-bottom: 16px !important;
+  flex-shrink: 0 !important;
+}
+
+.ant-modal .ant-modal-title {
+  color: #f8fafc !important;
+  font-size: 1.125rem !important;
+  font-weight: 700 !important;
+}
+
+.ant-modal .ant-modal-close {
+  color: #94a3b8 !important;
+  top: 16px !important;
+  inset-inline-end: 16px !important;
+}
+
+.ant-modal .ant-modal-close:hover {
+  color: #f8fafc !important;
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.ant-modal .ant-modal-body {
+  flex: 1 1 auto !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding-right: 4px !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+/* Custom scrollbar cho Modal Body */
+.ant-modal .ant-modal-body::-webkit-scrollbar {
+  width: 5px;
+}
+.ant-modal .ant-modal-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+.ant-modal .ant-modal-body::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 9999px;
+}
+.ant-modal .ant-modal-body::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+@media (max-width: 640px) {
+  .ant-modal {
+    max-width: calc(100vw - 16px) !important;
+    margin: 8px auto !important;
+    top: 8px !important;
+    padding-bottom: 8px !important;
+  }
+
+  .ant-modal .ant-modal-content {
+    padding: 16px 14px !important;
+    max-height: calc(100dvh - 16px) !important;
+    border-radius: 16px !important;
+  }
+
+  .ant-modal .ant-modal-header {
+    margin-bottom: 12px !important;
+  }
+
+  .ant-modal .ant-modal-title {
+    font-size: 1rem !important;
+  }
+}
+
+/* =============================================================================
+   Ant Design Table Mobile Scroll & Touch Isolation
+   Đảm bảo container bảng cuộn ngang mượt mà, không đẩy vỡ bố cục body
+   ============================================================================= */
+.ant-table-wrapper {
+  max-width: 100% !important;
+  width: 100% !important;
+  overflow: hidden !important;
+}
+
+.ant-table-wrapper .ant-table-container {
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+.ant-table-wrapper .ant-table-content {
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior-x: contain !important;
 }
 
 /* =============================================================================
@@ -208,6 +378,19 @@ input:-webkit-autofill:active {
 .ant-select-focused .ant-select-selector {
   border-color: rgba(229, 57, 53, 0.6) !important;
   box-shadow: 0 0 0 2px rgba(229, 57, 53, 0.16) !important;
+}
+
+/* =============================================================================
+   Ant Design Layout Header Padding Override (Eliminates 50px mobile side gap)
+   ============================================================================= */
+.ant-layout-header {
+  padding: 0 16px !important;
+}
+
+@media (min-width: 640px) {
+  .ant-layout-header {
+    padding: 0 24px !important;
+  }
 }
 
 /* =============================================================================

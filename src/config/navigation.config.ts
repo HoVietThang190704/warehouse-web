@@ -9,6 +9,22 @@ import {
 } from '@/components/ui';
 import { TranslationKey } from '@/lib/i18n';
 
+/**
+ * Đường dẫn nội bộ toàn ứng dụng (Centralized App Routes)
+ * Tránh hardcode URL string rải rác trong code
+ */
+export const APP_ROUTES = {
+  DASHBOARD: '/dashboard',
+  INVENTORY: '/dashboard/inventory',
+  INBOUND: '/dashboard/inventory/in',
+  OUTBOUND: '/dashboard/inventory/out',
+  PRODUCTS: '/dashboard/products',
+  PRODUCT_DETAIL: (id: string) => `/dashboard/products/${id}`,
+  CATEGORIES: '/dashboard/categories',
+  CATEGORY_DETAIL: (id: string) => `/dashboard/categories/${id}`,
+  ORDERS: '/dashboard/orders',
+} as const;
+
 export interface NavItem {
   key: string;
   path: string;
@@ -29,38 +45,38 @@ export interface NavItem {
 export const NAV_ITEMS: readonly NavItem[] = [
   {
     key: 'overview',
-    path: '/dashboard',
+    path: APP_ROUTES.DASHBOARD,
     labelKey: 'dashboard.overview',
     icon: ChartBar,
     exact: true,
   },
   {
     key: 'inventory',
-    path: '/dashboard/inventory',
+    path: APP_ROUTES.INVENTORY,
     labelKey: 'dashboard.menuInventory',
     icon: Warehouse,
   },
   {
     key: 'inbound',
-    path: '/dashboard/inventory/in',
-    labelKey: 'dashboard.orders', // Or custom title
+    path: APP_ROUTES.INBOUND,
+    labelKey: 'dashboard.orders',
     icon: ArrowDown,
   },
   {
     key: 'outbound',
-    path: '/dashboard/inventory/out',
+    path: APP_ROUTES.OUTBOUND,
     labelKey: 'dashboard.orderSystemStatus',
     icon: ArrowUp,
   },
   {
     key: 'products',
-    path: '/dashboard/products',
+    path: APP_ROUTES.PRODUCTS,
     labelKey: 'dashboard.menuProducts',
     icon: Package,
   },
   {
     key: 'categories',
-    path: '/dashboard/categories',
+    path: APP_ROUTES.CATEGORIES,
     labelKey: 'dashboard.menuCategories',
     icon: SquaresFour,
   },

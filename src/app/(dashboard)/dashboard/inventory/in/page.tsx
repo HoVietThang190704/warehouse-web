@@ -16,11 +16,12 @@ import {
   message,
 } from '@/components/ui';
 import { useProducts } from '@/features/catalog';
-import { useRecordReceipt } from '@/features/inventory';
+import { useRecordReceipt, StockReceiptInput } from '@/features/inventory';
+import { APP_ROUTES } from '@/config/navigation.config';
 
 export default function StockInPage() {
   const router = useRouter();
-  const [form] = Form.useForm();
+  const [form] = Form.useForm<StockReceiptInput>();
   const { data: products = [], isLoading: productsLoading } = useProducts();
   const receiptMutation = useRecordReceipt();
 
@@ -29,7 +30,7 @@ export default function StockInPage() {
     label: `${p.name} (SKU: ${p.sku})`,
   }));
 
-  const handleFinish = async (values: any) => {
+  const handleFinish = async (values: StockReceiptInput) => {
     try {
       await receiptMutation.mutateAsync({
         productId: values.productId,
@@ -38,7 +39,7 @@ export default function StockInPage() {
         note: values.note,
       });
       form.resetFields();
-      router.push('/dashboard/inventory');
+      router.push(APP_ROUTES.INVENTORY);
     } catch {
       // Error handled in hook
     }
@@ -50,7 +51,7 @@ export default function StockInPage() {
         title="Phiếu Nhập Kho Hàng Hóa"
         subtitle="Ghi nhận lô hàng nhập vào kho, cập nhật tăng số dư tồn kho và ghi sổ cái bất biến"
         extra={
-          <Link href="/dashboard/inventory">
+          <Link href={APP_ROUTES.INVENTORY}>
             <Button icon={<ArrowLeft size={16} />}>
               Quay lại Sổ Tồn
             </Button>

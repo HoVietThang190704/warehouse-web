@@ -9,6 +9,7 @@ import { message } from '@/components/ui';
 export const catalogKeys = {
   all: ['catalog'] as const,
   categories: () => [...catalogKeys.all, 'categories'] as const,
+  categoryDetail: (id: string) => [...catalogKeys.all, 'category', id] as const,
   units: () => [...catalogKeys.all, 'units'] as const,
   products: (categoryId?: string) =>
     [...catalogKeys.all, 'products', { categoryId }] as const,
@@ -22,6 +23,57 @@ export function useCategories() {
   return useQuery({
     queryKey: catalogKeys.categories(),
     queryFn: () => catalogApi.getCategories(),
+  });
+}
+
+/**
+ * Hook tải chi tiết 1 nhóm hàng theo ID
+ */
+export function useCategory(id?: string) {
+  return useQuery({
+    queryKey: catalogKeys.categoryDetail(id || ''),
+    queryFn: () => catalogApi.getCategoryById(id || ''),
+    enabled: Boolean(id),
+  });
+}
+
+/**
+ * Hook cập nhật nhóm hàng
+ */
+export function useUpdateCategory() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, dto }: { id: string; dto: { name: string } }) =>
+      catalogApi.updateCategory(id, dto),
+    onSuccess: (updated: Category) => {
+      queryClient.invalidateQueries({ queryKey: catalogKeys.categories() });
+      queryClient.invalidateQueries({ queryKey: catalogKeys.categoryDetail(updated.id) });
+      message.success(`Cập nhật nhóm hàng "${updated.name}" thành công!`);
+    },
+    onError: (err: unknown) => {
+      const msg = err instanceof Error ? err.message : 'Cập nhật nhóm hàng thất bại';
+      message.error(msg);
+    },
+  });
+}
+
+/**
+ * Hook xóa nhóm hàng rỗng
+ */
+export function useDeleteCategory() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => catalogApi.deleteCategory(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: catalogKeys.categories() });
+      message.success('Xóa nhóm hàng thành công!');
+    },
+    onError: (err: unknown) => {
+      const msg = err instanceof Error ? err.message : 'Không thể xóa nhóm hàng';
+      message.error(msg);
+    },
   });
 }
 

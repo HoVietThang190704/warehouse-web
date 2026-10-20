@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import {
   Table,
   Tag,
@@ -9,11 +10,14 @@ import {
   PencilSimple,
   Trash,
   Copy,
+  Eye,
   Tooltip,
+  Popconfirm,
   message,
 } from '@/components/ui';
 import { Category } from '../types';
 import { useTranslation } from '@/lib/i18n';
+import { APP_ROUTES } from '@/config/navigation.config';
 
 const { Text } = Typography;
 
@@ -40,13 +44,19 @@ export function CategoryTable({ categories, loading, onEdit, onDelete }: Categor
       key: 'name',
       render: (text: string, record: Category) => (
         <div className="flex items-center space-x-3 py-1">
-          <div className="w-9 h-9 rounded-xl bg-sushi-surface border border-sushi-border text-sushi-primary flex items-center justify-center shrink-0 shadow-sm">
+          <Link
+            href={APP_ROUTES.CATEGORY_DETAIL(record.id)}
+            className="w-9 h-9 rounded-xl bg-sushi-surface border border-sushi-border text-sushi-primary flex items-center justify-center shrink-0 shadow-sm hover:border-blue-500 transition-colors"
+          >
             <SquaresFour size={18} weight="fill" />
-          </div>
+          </Link>
           <div className="min-w-0">
-            <Text strong className="text-sushi-text block text-sm font-sans">
+            <Link
+              href={APP_ROUTES.CATEGORY_DETAIL(record.id)}
+              className="text-white hover:text-blue-400 font-semibold block text-sm font-sans transition-colors"
+            >
               {text}
-            </Text>
+            </Link>
             <div className="flex items-center space-x-1.5 text-2xs text-sushi-text-dim font-mono mt-0.5">
               <span>ID: {record.id.slice(0, 8)}...</span>
               <Tooltip title={t('dashboard.copied')}>
@@ -91,33 +101,62 @@ export function CategoryTable({ categories, loading, onEdit, onDelete }: Categor
     {
       title: t('common.actions'),
       key: 'actions',
-      width: 120,
+      width: 130,
       align: 'right' as const,
-      render: (_: unknown, record: Category) => (
-        <div className="flex items-center justify-end space-x-1">
-          <Tooltip title={t('dashboard.edit')}>
+      render: (_: unknown, record: Category) => {
+        const productCount = record._count?.products || 0;
+        const canDelete = productCount === 0;
+
+        return (
+          <div className="flex items-center justify-end space-x-1">
+            <Link
+              href={APP_ROUTES.CATEGORY_DETAIL(record.id)}
+              className="w-8 h-8 rounded-lg flex items-center justify-center text-sushi-text-muted hover:text-white hover:bg-sushi-surface transition-colors border border-transparent hover:border-sushi-border"
+              aria-label="Xem chi tiết"
+              title="Xem chi tiết nhóm hàng"
+            >
+              <Eye size={16} />
+            </Link>
+
             <button
               type="button"
               onClick={() => onEdit?.(record)}
               className="w-8 h-8 rounded-lg flex items-center justify-center text-sushi-text-muted hover:text-white hover:bg-sushi-card-hover transition-colors cursor-pointer border border-transparent hover:border-sushi-border"
               aria-label={t('dashboard.edit')}
+              title={t('dashboard.edit')}
             >
               <PencilSimple size={16} />
             </button>
-          </Tooltip>
 
-          <Tooltip title={t('dashboard.delete')}>
-            <button
-              type="button"
-              onClick={() => onDelete?.(record)}
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-sushi-text-muted hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer border border-transparent hover:border-red-500/30"
-              aria-label={t('dashboard.delete')}
-            >
-              <Trash size={16} />
-            </button>
-          </Tooltip>
-        </div>
-      ),
+            {canDelete ? (
+              <Popconfirm
+                title="Xóa nhóm hàng"
+                description={`Bạn có chắc muốn xóa nhóm hàng "${record.name}"?`}
+                onConfirm={() => onDelete?.(record)}
+                okText="Xóa"
+                cancelText="Hủy"
+                okButtonProps={{ danger: true }}
+              >
+                <button
+                  type="button"
+                  className="w-8 h-8 rounded-lg flex items-center justify-center text-sushi-text-muted hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer border border-transparent hover:border-red-500/30"
+                  aria-label={t('dashboard.delete')}
+                  title={t('dashboard.delete')}
+                >
+                  <Trash size={16} />
+                </button>
+              </Popconfirm>
+            ) : (
+              <span
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-600 cursor-not-allowed"
+                title="Không thể xóa nhóm hàng đang có hàng hóa"
+              >
+                <Trash size={16} />
+              </span>
+            )}
+          </div>
+        );
+      },
     },
   ];
 

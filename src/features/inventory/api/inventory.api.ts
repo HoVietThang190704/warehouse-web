@@ -4,8 +4,11 @@ import {
   StockBalanceItem,
   StockReceiptInput,
   StockIssueInput,
+  StockReceiptResult,
+  StockIssueResult,
   WarehouseItem,
   DashboardKpis,
+  StockDocumentItem,
 } from '../types';
 
 export const inventoryApi = {
@@ -28,8 +31,8 @@ export const inventoryApi = {
   /**
    * Nhập kho hàng hóa
    */
-  recordReceipt: async (dto: StockReceiptInput) => {
-    return fetchApi(API_ENDPOINTS.INVENTORY.RECEIPTS, {
+  recordReceipt: async (dto: StockReceiptInput): Promise<StockReceiptResult> => {
+    return fetchApi<StockReceiptResult>(API_ENDPOINTS.INVENTORY.RECEIPTS, {
       method: 'POST',
       body: JSON.stringify(dto),
     });
@@ -38,8 +41,8 @@ export const inventoryApi = {
   /**
    * Xuất kho hàng hóa (Chặn xuất âm)
    */
-  recordIssue: async (dto: StockIssueInput) => {
-    return fetchApi(API_ENDPOINTS.INVENTORY.ISSUES, {
+  recordIssue: async (dto: StockIssueInput): Promise<StockIssueResult> => {
+    return fetchApi<StockIssueResult>(API_ENDPOINTS.INVENTORY.ISSUES, {
       method: 'POST',
       body: JSON.stringify(dto),
     });
@@ -63,8 +66,8 @@ export const inventoryApi = {
   /**
    * Lấy lịch sử chứng từ
    */
-  getDocuments: async (warehouseId?: string) => {
+  getDocuments: async (warehouseId?: string): Promise<StockDocumentItem[]> => {
     const q = warehouseId ? `?warehouseId=${encodeURIComponent(warehouseId)}` : '';
-    return fetchApi(`${API_ENDPOINTS.INVENTORY.DOCUMENTS}${q}`);
+    return fetchApi<StockDocumentItem[]>(`${API_ENDPOINTS.INVENTORY.DOCUMENTS}${q}`);
   },
 };

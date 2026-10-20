@@ -15,11 +15,12 @@ import {
   ArrowUp,
   message,
 } from '@/components/ui';
-import { useStockBalances, useRecordIssue } from '@/features/inventory';
+import { useStockBalances, useRecordIssue, StockIssueInput } from '@/features/inventory';
+import { APP_ROUTES } from '@/config/navigation.config';
 
 export default function StockOutPage() {
   const router = useRouter();
-  const [form] = Form.useForm();
+  const [form] = Form.useForm<StockIssueInput>();
   const { data: balances = [], isLoading } = useStockBalances();
   const issueMutation = useRecordIssue();
 
@@ -35,7 +36,7 @@ export default function StockOutPage() {
     label: `${b.productName} (SKU: ${b.productSku}) — Tồn: ${b.quantity} ${b.unitName}`,
   }));
 
-  const handleFinish = async (values: any) => {
+  const handleFinish = async (values: StockIssueInput) => {
     if (isOverStock) {
       message.error(`Không thể xuất quá số lượng tồn kho khả dụng (${availableQty})`);
       return;
@@ -49,7 +50,7 @@ export default function StockOutPage() {
         note: values.note,
       });
       form.resetFields();
-      router.push('/dashboard/inventory');
+      router.push(APP_ROUTES.INVENTORY);
     } catch {
       // Error handled in hook
     }
@@ -61,7 +62,7 @@ export default function StockOutPage() {
         title="Phiếu Xuất Kho Hàng Hóa"
         subtitle="Xuất hàng hóa ra khỏi kho, kiểm soát chống xuất âm và ghi nhận giảm số dư tồn tức thời"
         extra={
-          <Link href="/dashboard/inventory">
+          <Link href={APP_ROUTES.INVENTORY}>
             <Button icon={<ArrowLeft size={16} />}>
               Quay lại Sổ Tồn
             </Button>

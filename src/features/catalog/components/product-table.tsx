@@ -2,18 +2,20 @@
 
 import React from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import {
   Table,
   Tag,
   Typography,
   Package,
   PencilSimple,
-  Trash,
+  Eye,
   Tooltip,
 } from '@/components/ui';
 import { Product } from '../types';
 import { useTranslation } from '@/lib/i18n';
 import { useFormatCurrency } from '@/lib/hooks/use-format-currency';
+import { APP_ROUTES } from '@/config/navigation.config';
 
 const { Text } = Typography;
 
@@ -21,10 +23,9 @@ interface ProductTableProps {
   products: Product[];
   loading?: boolean;
   onEdit?: (product: Product) => void;
-  onDelete?: (product: Product) => void;
 }
 
-export function ProductTable({ products, loading, onEdit, onDelete }: ProductTableProps) {
+export function ProductTable({ products, loading, onEdit }: ProductTableProps) {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
 
@@ -35,7 +36,10 @@ export function ProductTable({ products, loading, onEdit, onDelete }: ProductTab
       key: 'imageUrl',
       width: 76,
       render: (url: string | null | undefined, record: Product) => (
-        <div className="w-11 h-11 rounded-xl overflow-hidden border border-sushi-border bg-sushi-surface flex items-center justify-center shrink-0 shadow-sm">
+        <Link
+          href={APP_ROUTES.PRODUCT_DETAIL(record.id)}
+          className="w-11 h-11 rounded-xl overflow-hidden border border-sushi-border bg-sushi-surface flex items-center justify-center shrink-0 shadow-sm hover:border-blue-500 transition-colors"
+        >
           {url ? (
             <Image
               src={url}
@@ -48,7 +52,7 @@ export function ProductTable({ products, loading, onEdit, onDelete }: ProductTab
           ) : (
             <Package size={20} className="text-sushi-text-dim" />
           )}
-        </div>
+        </Link>
       ),
     },
     {
@@ -57,9 +61,12 @@ export function ProductTable({ products, loading, onEdit, onDelete }: ProductTab
       key: 'name',
       render: (name: string, record: Product) => (
         <div className="py-1">
-          <Text strong className="text-sushi-text block text-sm font-sans">
+          <Link
+            href={APP_ROUTES.PRODUCT_DETAIL(record.id)}
+            className="text-white hover:text-blue-400 font-semibold block text-sm font-sans transition-colors"
+          >
             {name}
-          </Text>
+          </Link>
           <div className="flex items-center space-x-2 text-2xs text-sushi-text-dim font-mono mt-0.5">
             <span className="text-blue-400 font-semibold">SKU: {record.sku}</span>
             {record.barcode && (
@@ -129,7 +136,7 @@ export function ProductTable({ products, loading, onEdit, onDelete }: ProductTab
       title: 'Trạng thái',
       dataIndex: 'isActive',
       key: 'isActive',
-      width: 130,
+      width: 120,
       render: (isActive: boolean) => (
         <span
           className={`inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${
@@ -147,6 +154,34 @@ export function ProductTable({ products, loading, onEdit, onDelete }: ProductTab
         </span>
       ),
     },
+    {
+      title: 'Thao tác',
+      key: 'actions',
+      width: 110,
+      align: 'right' as const,
+      render: (_: unknown, record: Product) => (
+        <div className="flex items-center justify-end space-x-1">
+          <Link
+            href={APP_ROUTES.PRODUCT_DETAIL(record.id)}
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-sushi-text-muted hover:text-white hover:bg-sushi-surface transition-colors border border-transparent hover:border-sushi-border"
+            aria-label="Xem chi tiết"
+            title="Xem chi tiết"
+          >
+            <Eye size={16} />
+          </Link>
+
+          <button
+            type="button"
+            onClick={() => onEdit?.(record)}
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-sushi-text-muted hover:text-white hover:bg-sushi-surface transition-colors cursor-pointer border border-transparent hover:border-sushi-border"
+            aria-label="Chỉnh sửa"
+            title="Chỉnh sửa"
+          >
+            <PencilSimple size={16} />
+          </button>
+        </div>
+      ),
+    },
   ];
 
   return (
@@ -161,7 +196,7 @@ export function ProductTable({ products, loading, onEdit, onDelete }: ProductTab
           showSizeChanger: true,
           className: 'px-4 py-2 select-none',
         }}
-        scroll={{ x: 800 }}
+        scroll={{ x: 900 }}
       />
     </div>
   );

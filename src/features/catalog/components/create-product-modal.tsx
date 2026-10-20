@@ -114,6 +114,7 @@ export function CreateProductModal({
       footer={null}
       destroyOnHidden
       width={580}
+      centered
     >
       <Form
         form={form}
@@ -306,7 +307,7 @@ export function CreateProductModal({
         </Form.Item>
 
         {/* Modal Actions */}
-        <div className="flex items-center justify-end space-x-3 pt-4 border-t border-sushi-border/80">
+        <div className="sticky bottom-0 bg-sushi-card/95 backdrop-blur-md pt-3.5 pb-1 -mx-2 px-2 mt-4 border-t border-sushi-border/80 flex items-center justify-end space-x-3 z-10">
           <Button onClick={handleModalClose} disabled={submitting}>
             Hủy
           </Button>

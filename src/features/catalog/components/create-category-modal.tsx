@@ -50,6 +50,7 @@ export function CreateCategoryModal({
       onCancel={onClose}
       footer={null}
       destroyOnHidden
+      centered
     >
       <Form form={form} layout="vertical" onFinish={handleSubmit}>
         <Form.Item

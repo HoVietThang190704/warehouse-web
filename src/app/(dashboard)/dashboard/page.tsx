@@ -17,6 +17,7 @@ import {
   Database,
   ArrowRight,
   ArrowsClockwise,
+  Info,
 } from '@/components/ui';
 import {
   useDashboardKpis,
@@ -254,8 +255,9 @@ export default function DashboardOverviewPage() {
             )}
           </div>
 
-          <div className="pt-3 border-t border-sushi-border/80 flex items-center justify-between text-2xs text-sushi-text-dim">
-            <span>💡 Mẹo: Nhập hàng ngay khi có cảnh báo để không bị hụt hàng khi khách đặt đơn.</span>
+          <div className="pt-3 border-t border-sushi-border/80 flex items-center gap-1.5 text-2xs text-sushi-text-dim">
+            <Info size={13} className="text-sushi-text-muted shrink-0" />
+            <span>Mẹo: Nhập hàng ngay khi có cảnh báo để không bị hụt hàng khi khách đặt đơn.</span>
           </div>
         </div>
 
@@ -301,8 +303,12 @@ export default function DashboardOverviewPage() {
                           <div className="font-semibold text-white truncate">
                             {m.productName}
                           </div>
-                          <div className="text-2xs text-sushi-text-dim font-mono">
-                            {m.code || 'CHỨNG TỪ'}
+                          <div className="text-2xs text-sushi-text-dim font-mono flex items-center gap-1.5 flex-wrap">
+                            <span>{m.code || 'CHỨNG TỪ'}</span>
+                            <span>·</span>
+                            <span className="text-slate-300">
+                              Người thực hiện: <strong className="text-white font-medium">{m.performerName || 'Không xác định'}</strong>
+                            </span>
                           </div>
                         </div>
                       </div>
