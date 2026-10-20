@@ -6,7 +6,7 @@ import {
   Table,
   Tag,
   Typography,
-  ForkKnife,
+  Package,
   PencilSimple,
   Trash,
   Tooltip,
@@ -30,7 +30,7 @@ export function ProductTable({ products, loading, onEdit, onDelete }: ProductTab
 
   const columns = [
     {
-      title: t('dashboard.productTableImage'),
+      title: 'Ảnh',
       dataIndex: 'imageUrl',
       key: 'imageUrl',
       width: 76,
@@ -46,13 +46,13 @@ export function ProductTable({ products, loading, onEdit, onDelete }: ProductTab
               unoptimized
             />
           ) : (
-            <ForkKnife size={20} className="text-sushi-text-dim" />
+            <Package size={20} className="text-sushi-text-dim" />
           )}
         </div>
       ),
     },
     {
-      title: t('dashboard.productTableName'),
+      title: 'Tên hàng & Mã SKU',
       dataIndex: 'name',
       key: 'name',
       render: (name: string, record: Product) => (
@@ -61,11 +61,11 @@ export function ProductTable({ products, loading, onEdit, onDelete }: ProductTab
             {name}
           </Text>
           <div className="flex items-center space-x-2 text-2xs text-sushi-text-dim font-mono mt-0.5">
-            <span>SKU: {record.sku}</span>
+            <span className="text-blue-400 font-semibold">SKU: {record.sku}</span>
             {record.barcode && (
               <>
                 <span>·</span>
-                <span>Barcode: {record.barcode}</span>
+                <span>Mã vạch: {record.barcode}</span>
               </>
             )}
           </div>
@@ -73,45 +73,63 @@ export function ProductTable({ products, loading, onEdit, onDelete }: ProductTab
       ),
     },
     {
-      title: t('dashboard.productTableCategory'),
+      title: 'Nhóm hàng',
       key: 'category',
       width: 170,
       render: (_: unknown, record: Product) => (
         <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-sushi-surface border border-sushi-border text-sushi-text-muted">
-          {record.category?.name || t('common.uncategorized')}
+          {record.category?.name || 'Chưa phân loại'}
         </span>
       ),
     },
     {
-      title: t('dashboard.productTableType'),
-      dataIndex: 'type',
-      key: 'type',
-      width: 120,
-      render: (type: string) => (
-        <Tag
-          color={type === 'COMBO' ? 'gold' : 'blue'}
-          className="text-2xs font-mono font-semibold"
-        >
-          {type}
-        </Tag>
+      title: 'Đơn vị',
+      key: 'unit',
+      width: 90,
+      render: (_: unknown, record: Product) => (
+        <span className="text-xs font-mono font-medium text-slate-300">
+          {record.baseUnit?.name || 'Cái'}
+        </span>
       ),
     },
     {
-      title: t('dashboard.productTablePrice'),
+      title: 'Ngưỡng cảnh báo',
+      dataIndex: 'minStock',
+      key: 'minStock',
+      width: 130,
+      render: (min: number | string) => (
+        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-mono font-semibold bg-amber-500/10 border border-amber-500/25 text-amber-400">
+          &le; {Number(min || 5)}
+        </span>
+      ),
+    },
+    {
+      title: 'Giá vốn',
+      dataIndex: 'costPrice',
+      key: 'costPrice',
+      width: 130,
+      render: (price: number | string) => (
+        <span className="text-sushi-text-muted font-mono text-xs">
+          {formatCurrency(price || 0)}
+        </span>
+      ),
+    },
+    {
+      title: 'Giá bán',
       dataIndex: 'sellingPrice',
       key: 'sellingPrice',
-      width: 140,
+      width: 130,
       render: (price: number | string) => (
         <span className="text-sushi-text font-bold font-sans text-sm">
-          {formatCurrency(price)}
+          {formatCurrency(price || 0)}
         </span>
       ),
     },
     {
-      title: t('dashboard.productTableStatus'),
+      title: 'Trạng thái',
       dataIndex: 'isActive',
       key: 'isActive',
-      width: 140,
+      width: 130,
       render: (isActive: boolean) => (
         <span
           className={`inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${
@@ -125,71 +143,26 @@ export function ProductTable({ products, loading, onEdit, onDelete }: ProductTab
               isActive ? 'bg-emerald-500' : 'bg-zinc-500'
             }`}
           />
-          <span>{isActive ? t('common.active') : t('common.inactive')}</span>
+          <span>{isActive ? 'Hoạt động' : 'Tạm ngừng'}</span>
         </span>
-      ),
-    },
-    {
-      title: t('common.actions'),
-      key: 'actions',
-      width: 110,
-      align: 'right' as const,
-      render: (_: unknown, record: Product) => (
-        <div className="flex items-center justify-end space-x-1">
-          <Tooltip title={t('dashboard.edit')}>
-            <button
-              type="button"
-              onClick={() => onEdit?.(record)}
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-sushi-text-muted hover:text-white hover:bg-sushi-card-hover transition-colors cursor-pointer border border-transparent hover:border-sushi-border"
-              aria-label={t('dashboard.edit')}
-            >
-              <PencilSimple size={16} />
-            </button>
-          </Tooltip>
-
-          <Tooltip title={t('dashboard.delete')}>
-            <button
-              type="button"
-              onClick={() => onDelete?.(record)}
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-sushi-text-muted hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer border border-transparent hover:border-red-500/30"
-              aria-label={t('dashboard.delete')}
-            >
-              <Trash size={16} />
-            </button>
-          </Tooltip>
-        </div>
       ),
     },
   ];
 
   return (
-    <Table
-      loading={loading}
-      dataSource={products}
-      columns={columns}
-      rowKey="id"
-      pagination={{
-        pageSize: 8,
-        showSizeChanger: false,
-        className: 'py-3 px-4',
-      }}
-      scroll={{ x: 'max-content' }}
-      className="border border-sushi-border rounded-2xl overflow-hidden shadow-sm"
-      locale={{
-        emptyText: (
-          <div className="py-14 flex flex-col items-center justify-center text-center">
-            <div className="w-14 h-14 rounded-2xl bg-sushi-surface border border-sushi-border flex items-center justify-center text-sushi-text-dim mb-3 shadow-inner">
-              <ForkKnife size={26} />
-            </div>
-            <p className="text-sm font-semibold text-sushi-text">
-              {t('dashboard.noDataTitle')}
-            </p>
-            <p className="text-xs text-sushi-text-dim mt-1 max-w-sm leading-relaxed">
-              {t('dashboard.noProductsDesc')}
-            </p>
-          </div>
-        ),
-      }}
-    />
+    <div className="rounded-2xl border border-sushi-border overflow-hidden bg-sushi-card shadow-sm">
+      <Table
+        dataSource={products}
+        columns={columns}
+        rowKey="id"
+        loading={loading}
+        pagination={{
+          pageSize: 10,
+          showSizeChanger: true,
+          className: 'px-4 py-2 select-none',
+        }}
+        scroll={{ x: 800 }}
+      />
+    </div>
   );
 }

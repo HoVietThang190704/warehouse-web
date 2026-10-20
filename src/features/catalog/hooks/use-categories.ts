@@ -9,6 +9,7 @@ import { message } from '@/components/ui';
 export const catalogKeys = {
   all: ['catalog'] as const,
   categories: () => [...catalogKeys.all, 'categories'] as const,
+  units: () => [...catalogKeys.all, 'units'] as const,
   products: (categoryId?: string) =>
     [...catalogKeys.all, 'products', { categoryId }] as const,
   productDetail: (id: string) => [...catalogKeys.all, 'product', id] as const,
@@ -22,6 +23,25 @@ export function useCategories() {
     queryKey: catalogKeys.categories(),
     queryFn: () => catalogApi.getCategories(),
   });
+}
+
+/**
+ * Hook tải đơn vị tính
+ */
+export function useUnits() {
+  return useQuery({
+    queryKey: catalogKeys.units(),
+    queryFn: () => catalogApi.getUnits(),
+  });
+}
+
+export function useUnitOptions() {
+  const { data: units = [], isLoading } = useUnits();
+  const options = units.map((u) => ({
+    value: u.id,
+    label: `${u.name} (${u.code})`,
+  }));
+  return { options, units, isLoading };
 }
 
 /**

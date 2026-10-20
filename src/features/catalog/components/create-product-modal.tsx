@@ -8,7 +8,6 @@ import {
   Input,
   InputNumber,
   Select,
-  Radio,
   Button,
   Space,
   ImageSquare,
@@ -21,7 +20,7 @@ import { createProductSchema } from '../schemas/catalog.schema';
 import { catalogApi } from '../api/catalog.api';
 import { createZodRule } from '@/lib/zod-validator';
 import { useTranslation } from '@/lib/i18n';
-import { useCategoryOptions } from '../hooks/use-categories';
+import { useCategoryOptions, useUnitOptions } from '../hooks/use-categories';
 
 interface CreateProductModalProps {
   open: boolean;
@@ -41,6 +40,7 @@ export function CreateProductModal({
   const [imageUrl, setImageUrl] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { options: categoryOptions } = useCategoryOptions();
+  const { options: unitOptions } = useUnitOptions();
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -61,7 +61,7 @@ export function CreateProductModal({
       const result = await catalogApi.uploadImage(file);
       setImageUrl(result.url);
       form.setFieldValue('imageUrl', result.url);
-      message.success(t('dashboard.uploadSuccess'));
+      message.success('Tải ảnh lên thành công!');
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Tải ảnh lên thất bại';
       message.error(msg);
@@ -83,6 +83,7 @@ export function CreateProductModal({
 
     const result = createProductSchema.safeParse(values);
     if (!result.success) {
+      message.error(result.error.issues[0]?.message || 'Dữ liệu không hợp lệ');
       setSubmitting(false);
       return;
     }
@@ -93,7 +94,7 @@ export function CreateProductModal({
       setImageUrl('');
       onClose();
     } catch {
-      // Error message is handled in mutation hook
+      // Handled in mutation
     } finally {
       setSubmitting(false);
     }
@@ -107,98 +108,129 @@ export function CreateProductModal({
 
   return (
     <Modal
-      title={t('dashboard.modalCreateProductTitle')}
+      title="Thêm Hàng Hóa Mới Vào Kho"
       open={open}
       onCancel={handleModalClose}
       footer={null}
       destroyOnHidden
-      width={560}
+      width={580}
     >
       <Form
         form={form}
         layout="vertical"
         onFinish={handleSubmit}
-        initialValues={{ type: 'SINGLE', sellingPrice: 50000 }}
+        initialValues={{ minStock: 5, costPrice: 0, sellingPrice: 0 }}
       >
-        {/* Tên món */}
+        {/* Tên hàng */}
         <Form.Item
           name="name"
-          label={t('dashboard.productNameLabel')}
+          label="Tên hàng hóa"
           rules={[createZodRule(createProductSchema, 'name')]}
         >
-          <Input placeholder={t('dashboard.productNamePlaceholder')} />
+          <Input placeholder="Ví dụ: Pin sạc dự phòng 20000mAh..." />
         </Form.Item>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Mã SKU */}
           <Form.Item
             name="sku"
-            label={t('dashboard.productSkuLabel')}
+            label="Mã SKU"
             rules={[createZodRule(createProductSchema, 'sku')]}
           >
-            <Input placeholder={t('dashboard.productSkuPlaceholder')} className="uppercase font-mono" />
+            <Input placeholder="Ví dụ: SP-PIN-01" className="uppercase font-mono" />
           </Form.Item>
 
-          {/* Danh mục */}
+          {/* Barcode */}
           <Form.Item
-            name="categoryId"
-            label={t('dashboard.productCategoryLabel')}
+            name="barcode"
+            label="Mã vạch (Barcode)"
           >
-            <Select
-              placeholder={t('dashboard.productCategoryPlaceholder')}
-              allowClear
-              options={categoryOptions}
-            />
+            <Input placeholder="893000..." className="font-mono" />
           </Form.Item>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {/* Loại sản phẩm: SINGLE vs COMBO */}
+          {/* Nhóm hàng */}
           <Form.Item
-            name="type"
-            label={t('dashboard.productTypeLabel')}
+            name="categoryId"
+            label="Nhóm hàng"
           >
-            <Radio.Group buttonStyle="solid" className="w-full">
-              <Radio.Button value="SINGLE" className="w-1/2 text-center">
-                {t('dashboard.productTypeSingle')}
-              </Radio.Button>
-              <Radio.Button value="COMBO" className="w-1/2 text-center">
-                {t('dashboard.productTypeCombo')}
-              </Radio.Button>
-            </Radio.Group>
+            <Select
+              placeholder="Chọn nhóm hàng"
+              allowClear
+              options={categoryOptions}
+            />
+          </Form.Item>
+
+          {/* Đơn vị tính */}
+          <Form.Item
+            name="baseUnitId"
+            label="Đơn vị tính cơ sở"
+          >
+            <Select
+              placeholder="Chọn đơn vị tính (Cái, Hộp...)"
+              allowClear
+              options={unitOptions}
+            />
+          </Form.Item>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {/* Ngưỡng cảnh báo tồn tối thiểu */}
+          <Form.Item
+            name="minStock"
+            label={
+              <span className="text-amber-400 font-medium">
+                Ngưỡng cảnh báo (&le;)
+              </span>
+            }
+            rules={[createZodRule(createProductSchema, 'minStock')]}
+            tooltip="Hệ thống sẽ bật cờ vàng và đưa vào danh sách cảnh báo hụt hàng khi tồn kho chạm ngưỡng này (Mặc định: 5)"
+          >
+            <InputNumber<number>
+              style={{ width: '100%' }}
+              min={0}
+              placeholder="5"
+            />
+          </Form.Item>
+
+          {/* Giá vốn */}
+          <Form.Item
+            name="costPrice"
+            label="Giá vốn ước tính (VNĐ)"
+          >
+            <InputNumber<number>
+              style={{ width: '100%' }}
+              min={0}
+              step={5000}
+              formatter={(val) => (val ? `${val}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',') : '')}
+              parser={(val) => (val ? Number(val.replace(/,/g, '')) : 0)}
+              placeholder="0"
+            />
           </Form.Item>
 
           {/* Giá bán */}
           <Form.Item
             name="sellingPrice"
-            label={t('dashboard.productPriceLabel')}
-            rules={[createZodRule(createProductSchema, 'sellingPrice')]}
+            label="Giá bán (VNĐ)"
           >
             <InputNumber<number>
               style={{ width: '100%' }}
-              min={1000}
+              min={0}
               step={5000}
-              formatter={(value) =>
-                value ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',') : ''
-              }
-              parser={(value) =>
-                value ? Number(value.replace(/,/g, '')) : 0
-              }
-              placeholder="120,000"
+              formatter={(val) => (val ? `${val}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',') : '')}
+              parser={(val) => (val ? Number(val.replace(/,/g, '')) : 0)}
+              placeholder="0"
             />
           </Form.Item>
         </div>
 
-        {/* =====================================================================
-            Khu Vực Tải Ảnh Cloudinary Trực Tiếp
-           ===================================================================== */}
+        {/* Upload Ảnh */}
         <Form.Item
           name="imageUrl"
-          label={t('dashboard.productImageLabel')}
-          rules={[createZodRule(createProductSchema, 'imageUrl')]}
+          label="Hình ảnh sản phẩm (Cloudinary)"
         >
           <div className="space-y-3">
-            {/* Input file ẩn để kích hoạt chọn file */}
             <input
               type="file"
               ref={fileInputRef}
@@ -207,7 +239,6 @@ export function CreateProductModal({
               className="hidden"
             />
 
-            {/* Trạng thái xem trước ảnh đã tải lên */}
             {imageUrl ? (
               <div className="p-3 rounded-2xl bg-sushi-surface border border-sushi-border flex items-center justify-between gap-3">
                 <div className="flex items-center space-x-3 min-w-0">
@@ -236,68 +267,58 @@ export function CreateProductModal({
                     onClick={() => fileInputRef.current?.click()}
                     disabled={uploading}
                   >
-                    {t('dashboard.changeImage')}
+                    Đổi ảnh
                   </Button>
                   <Button
                     size="small"
                     danger
                     icon={<Trash size={14} />}
                     onClick={handleRemoveImage}
-                    disabled={uploading}
                   />
                 </div>
               </div>
             ) : (
-              /* Vùng kéo thả hoặc click tải ảnh */
               <div
-                onClick={() => !uploading && fileInputRef.current?.click()}
-                className="p-6 rounded-2xl border-2 border-dashed border-sushi-border hover:border-sushi-primary/50 bg-sushi-surface/50 hover:bg-sushi-surface transition-all duration-200 cursor-pointer text-center group flex flex-col items-center justify-center space-y-2"
+                onClick={() => fileInputRef.current?.click()}
+                className="border-2 border-dashed border-sushi-border/80 hover:border-blue-500 rounded-2xl p-6 text-center cursor-pointer transition-all duration-200 bg-sushi-surface/40 hover:bg-sushi-surface/80 group select-none"
               >
                 {uploading ? (
-                  <div className="py-2 flex flex-col items-center space-y-2">
-                    <Spin />
-                    <span className="text-xs text-sushi-primary font-medium animate-pulse">
-                      {t('dashboard.uploading')}
-                    </span>
+                  <div className="flex flex-col items-center justify-center space-y-2 py-2">
+                    <Spin size="small" />
+                    <span className="text-xs text-sushi-text-dim font-mono">Đang tải ảnh lên Cloudinary...</span>
                   </div>
                 ) : (
-                  <>
-                    <div className="w-10 h-10 rounded-xl bg-sushi-card border border-sushi-border flex items-center justify-center text-sushi-primary group-hover:scale-105 transition-transform shadow-inner">
+                  <div className="flex flex-col items-center justify-center space-y-2">
+                    <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center group-hover:scale-110 transition-transform">
                       <ImageSquare size={22} />
                     </div>
-                    <div className="text-xs font-semibold text-sushi-text group-hover:text-sushi-primary transition-colors">
-                      {t('dashboard.uploadImageCloudinary')}
+                    <div>
+                      <span className="text-xs font-semibold text-sushi-text group-hover:text-blue-400 transition-colors">
+                        Bấm để tải ảnh lên
+                      </span>
+                      <p className="text-2xs text-sushi-text-dim mt-0.5">PNG, JPG, WEBP tối đa 5MB</p>
                     </div>
-                    <div className="text-2xs text-sushi-text-dim max-w-xs">
-                      {t('dashboard.uploadHint')}
-                    </div>
-                  </>
+                  </div>
                 )}
               </div>
             )}
-
-            {/* Input URL dự phòng */}
-            <Input
-              value={imageUrl}
-              onChange={(e) => {
-                setImageUrl(e.target.value);
-                form.setFieldValue('imageUrl', e.target.value);
-              }}
-              placeholder={t('dashboard.productImagePlaceholder')}
-              className="font-mono text-xs rounded-xl"
-            />
           </div>
         </Form.Item>
 
-        {/* Buttons */}
-        <Form.Item style={{ marginBottom: 0, textAlign: 'right', marginTop: 20 }}>
-          <Space>
-            <Button onClick={handleModalClose}>{t('common.cancel')}</Button>
-            <Button type="primary" htmlType="submit" loading={submitting}>
-              {t('common.create')}
-            </Button>
-          </Space>
-        </Form.Item>
+        {/* Modal Actions */}
+        <div className="flex items-center justify-end space-x-3 pt-4 border-t border-sushi-border/80">
+          <Button onClick={handleModalClose} disabled={submitting}>
+            Hủy
+          </Button>
+          <Button
+            type="primary"
+            htmlType="submit"
+            loading={submitting}
+            className="bg-blue-600 hover:bg-blue-500 font-semibold px-6"
+          >
+            Lưu Hàng Hóa
+          </Button>
+        </div>
       </Form>
     </Modal>
   );

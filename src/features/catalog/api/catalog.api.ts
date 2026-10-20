@@ -1,17 +1,24 @@
 import { fetchApi, getApiBaseUrl } from '@/lib/api';
 import { API_ENDPOINTS } from '@/lib/endpoints';
-import { Category, CreateCategoryInput, Product, CreateProductInput } from '../types';
+import { Category, CreateCategoryInput, Product, CreateProductInput, Unit } from '../types';
 
 export const catalogApi = {
   /**
-   * Lấy danh sách danh mục thực đơn (Kèm số lượng món ăn)
+   * Lấy danh sách nhóm hàng hóa
    */
   getCategories: async (): Promise<Category[]> => {
     return fetchApi<Category[]>(API_ENDPOINTS.CATALOG.CATEGORIES);
   },
 
   /**
-   * Tạo danh mục mới (Yêu cầu quyền SUPER_ADMIN hoặc BRANCH_MANAGER)
+   * Lấy danh sách đơn vị tính
+   */
+  getUnits: async (): Promise<Unit[]> => {
+    return fetchApi<Unit[]>(API_ENDPOINTS.CATALOG.UNITS);
+  },
+
+  /**
+   * Tạo nhóm hàng mới
    */
   createCategory: async (dto: CreateCategoryInput): Promise<Category> => {
     return fetchApi<Category>(API_ENDPOINTS.CATALOG.CATEGORIES, {
@@ -21,22 +28,25 @@ export const catalogApi = {
   },
 
   /**
-   * Lấy danh sách sản phẩm (có thể lọc theo categoryId)
+   * Lấy danh sách sản phẩm hàng hóa
    */
-  getProducts: async (categoryId?: string): Promise<Product[]> => {
-    const query = categoryId ? `?categoryId=${encodeURIComponent(categoryId)}` : '';
-    return fetchApi<Product[]>(`${API_ENDPOINTS.CATALOG.PRODUCTS}${query}`);
+  getProducts: async (categoryId?: string, search?: string): Promise<Product[]> => {
+    const params = new URLSearchParams();
+    if (categoryId) params.append('categoryId', categoryId);
+    if (search) params.append('search', search);
+    const queryString = params.toString() ? `?${params.toString()}` : '';
+    return fetchApi<Product[]>(`${API_ENDPOINTS.CATALOG.PRODUCTS}${queryString}`);
   },
 
   /**
-   * Lấy chi tiết 1 sản phẩm theo ID (kèm thông tin combo nếu có)
+   * Lấy chi tiết 1 hàng hóa theo ID
    */
   getProductById: async (id: string): Promise<Product> => {
     return fetchApi<Product>(API_ENDPOINTS.CATALOG.PRODUCT_BY_ID(id));
   },
 
   /**
-   * Tạo sản phẩm mới
+   * Tạo hàng hóa mới
    */
   createProduct: async (dto: CreateProductInput): Promise<Product> => {
     return fetchApi<Product>(API_ENDPOINTS.CATALOG.PRODUCTS, {

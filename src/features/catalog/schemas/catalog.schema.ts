@@ -1,14 +1,11 @@
 import { z } from 'zod';
 
-export type ProductType = 'SINGLE' | 'COMBO';
-
 export const createCategorySchema = z.object({
   name: z
     .string()
     .min(1, 'Vui lòng nhập tên danh mục!')
     .min(2, 'Tên danh mục phải có ít nhất 2 ký tự')
     .max(100, 'Tên danh mục không được vượt quá 100 ký tự'),
-  parentId: z.string().uuid('Parent ID phải là UUID hợp lệ').optional(),
 });
 
 export type CreateCategoryInput = z.infer<typeof createCategorySchema>;
@@ -21,14 +18,14 @@ export const createProductSchema = z.object({
   barcode: z.string().max(100).optional(),
   name: z
     .string()
-    .min(2, 'Tên sản phẩm phải có ít nhất 2 ký tự')
-    .max(160, 'Tên sản phẩm không được vượt quá 160 ký tự'),
-  type: z.enum(['SINGLE', 'COMBO']).default('SINGLE'),
+    .min(2, 'Tên hàng hóa phải có ít nhất 2 ký tự')
+    .max(160, 'Tên hàng hóa không được vượt quá 160 ký tự'),
   categoryId: z.string().uuid('Category ID phải là UUID hợp lệ').optional(),
-  sellingPrice: z.coerce
-    .number()
-    .positive('Giá bán phải lớn hơn 0'),
-  imageUrl: z.string().url('Đường dẫn ảnh không hợp lệ').optional().or(z.literal('')),
+  baseUnitId: z.string().uuid('Đơn vị tính phải là UUID hợp lệ').optional(),
+  minStock: z.coerce.number().min(0, 'Ngưỡng tồn tối thiểu phải >= 0').default(5),
+  costPrice: z.coerce.number().min(0, 'Giá vốn phải >= 0').default(0),
+  sellingPrice: z.coerce.number().min(0, 'Giá bán phải >= 0').default(0),
+  imageUrl: z.string().optional().or(z.literal('')),
 });
 
 export type CreateProductInput = z.infer<typeof createProductSchema>;

@@ -21,7 +21,6 @@ import { useTranslation } from '@/lib/i18n';
 export default function ProductsPage() {
   const { t } = useTranslation();
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | undefined>();
-  const [selectedType, setSelectedType] = useState<string>('ALL');
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -30,15 +29,9 @@ export default function ProductsPage() {
   const { data: products = [], isLoading } = useProducts(selectedCategoryId);
   const createProductMutation = useCreateProduct();
 
-  // Bộ lọc kết hợp: Từ khóa + Phân loại (SINGLE / COMBO)
+  // Bộ lọc kết hợp: Từ khóa (tên, SKU, barcode)
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
-      // 1. Lọc theo Type
-      if (selectedType !== 'ALL' && product.type !== selectedType) {
-        return false;
-      }
-
-      // 2. Lọc theo từ khóa tìm kiếm (tên, SKU, barcode)
       if (search.trim()) {
         const query = search.toLowerCase().trim();
         const matchName = product.name.toLowerCase().includes(query);
@@ -46,87 +39,68 @@ export default function ProductsPage() {
         const matchBarcode = product.barcode?.toLowerCase().includes(query);
         return matchName || matchSku || matchBarcode;
       }
-
       return true;
     });
-  }, [products, selectedType, search]);
+  }, [products, search]);
 
   return (
     <div className="space-y-5">
       <SushiPageHeader
-        title={t('dashboard.productsTitle')}
-        subtitle={t('dashboard.productsSubtitle')}
+        title="Danh Mục Hàng Hóa"
+        subtitle="Quản lý toàn bộ danh sách hàng hóa trong kho, mã vạch và định mức tồn kho tối thiểu"
         extra={
           <SushiButton
             type="primary"
             icon={<Plus size={16} weight="bold" />}
             onClick={() => setIsModalOpen(true)}
+            className="bg-blue-600 hover:bg-blue-500 font-semibold"
           >
-            {t('dashboard.addProduct')}
+            Thêm Hàng Hóa Mới
           </SushiButton>
         }
       />
 
       {/* Toolbar Tìm Kiếm & Bộ Lọc Đa Năng */}
-      <div className="p-4 rounded-2xl bg-sushi-card border border-sushi-border/80 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-3 flex-1">
-          {/* Ô tìm kiếm theo tên / SKU */}
-          <div className="w-full sm:w-64">
+      <div className="p-4 rounded-2xl bg-sushi-card border border-sushi-border flex flex-col sm:flex-row gap-3 items-center justify-between shadow-sm">
+        <div className="flex flex-col sm:flex-row gap-3 items-center w-full sm:w-auto flex-1">
+          {/* Ô Tìm kiếm */}
+          <div className="w-full sm:w-80">
             <Input
-              prefix={<MagnifyingGlass size={16} className="text-sushi-text-dim mr-1.5" />}
-              placeholder={t('dashboard.searchProductPlaceholder')}
-              allowClear
+              prefix={<MagnifyingGlass size={16} className="text-sushi-text-dim" />}
+              placeholder="Tìm theo tên hàng, mã SKU, barcode..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="rounded-xl"
+              allowClear
+              className="w-full"
             />
           </div>
 
-          {/* Bộ lọc danh mục */}
+          {/* Lọc theo Nhóm Hàng */}
           <div className="w-full sm:w-56">
             <Select
-              className="w-full"
-              placeholder={t('dashboard.allCategoriesFilter')}
+              placeholder="Tất cả nhóm hàng"
+              value={selectedCategoryId}
+              onChange={setSelectedCategoryId}
               allowClear
-              value={selectedCategoryId || undefined}
-              onChange={(val) => setSelectedCategoryId(val)}
-              options={[
-                { value: '', label: t('dashboard.allCategoriesFilter') },
-                ...categoryOptions,
-              ]}
-            />
-          </div>
-
-          {/* Bộ lọc phân loại Single / Combo dạng Dropdown */}
-          <div className="w-full sm:w-40">
-            <Select
+              options={categoryOptions}
               className="w-full"
-              value={selectedType}
-              onChange={(val) => setSelectedType(val)}
-              options={[
-                { value: 'ALL', label: t('dashboard.allTypes') },
-                { value: 'SINGLE', label: 'Single' },
-                { value: 'COMBO', label: 'Combo' },
-              ]}
             />
           </div>
         </div>
 
-        {/* Số lượng món hiển thị */}
-        <div className="text-xs font-mono text-sushi-text-dim shrink-0">
-          <span>
-            {filteredProducts.length} / {products.length} {t('common.itemsCount')}
-          </span>
+        {/* Tổng số sản phẩm hiển thị */}
+        <div className="text-xs text-sushi-text-muted font-mono whitespace-nowrap self-end sm:self-auto">
+          Tổng cộng: <span className="text-white font-semibold">{filteredProducts.length}</span> mặt hàng
         </div>
       </div>
 
-      {/* Bảng Danh Sách Món Ăn */}
+      {/* Bảng Dữ Liệu Sản Phẩm */}
       <ProductTable
         products={filteredProducts}
         loading={isLoading}
       />
 
-      {/* Modal Thêm Sản Phẩm Mới */}
+      {/* Modal Thêm Mới Sản Phẩm */}
       <CreateProductModal
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}

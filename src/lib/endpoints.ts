@@ -1,5 +1,5 @@
 /**
- * Centralized API Endpoints Dictionary for Sushi Platform
+ * Centralized API Endpoints Dictionary for Warehouse Platform
  * Single Source of Truth for all Network Contracts & Routing
  */
 export const API_ENDPOINTS = {
@@ -15,14 +15,15 @@ export const API_ENDPOINTS = {
     CATEGORY_BY_ID: (id: string) => `/api/catalog/categories/${id}`,
     PRODUCTS: '/api/catalog/products',
     PRODUCT_BY_ID: (id: string) => `/api/catalog/products/${id}`,
+    UNITS: '/api/catalog/units',
     UPLOAD: '/api/catalog/upload',
-  },
-  ORDERS: {
-    ROOT: '/api/orders',
-    BY_ID: (id: string) => `/api/orders/${id}`,
   },
   INVENTORY: {
     BALANCES: '/api/inventory/balances',
-    MOVEMENTS: '/api/inventory/movements',
+    RECEIPTS: '/api/inventory/receipts',
+    ISSUES: '/api/inventory/issues',
+    KPIS: '/api/inventory/kpis',
+    WAREHOUSES: '/api/inventory/warehouses',
+    DOCUMENTS: '/api/inventory/documents',
   },
 } as const;
