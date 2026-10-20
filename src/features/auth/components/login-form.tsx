@@ -194,13 +194,6 @@ export function LoginForm() {
                 {loading ? t('auth.authenticating') : t('auth.loginButton')}
               </SushiButton>
             </Form.Item>
-
-            {/* Demo Credentials Helper */}
-            <div className="mt-3.5 p-2.5 rounded-xl bg-blue-950/40 border border-blue-500/20 text-center">
-              <span className="text-2xs text-blue-300 font-mono block">
-                Tài khoản demo: <span className="text-white font-semibold">admin@warehouse.local</span> / <span className="text-white font-semibold">Admin@123</span>
-              </span>
-            </div>
           </Form>
         </div>
 
