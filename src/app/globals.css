@@ -1,0 +1,301 @@
+@import "tailwindcss";
+
+@theme {
+  /* Fonts */
+  --font-sans: var(--font-geist-sans), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* Typography Scale Tokens */
+  --text-2xs: 0.6875rem; /* 11px */
+  --text-xs: 0.75rem;    /* 12px */
+  --text-sm: 0.875rem;   /* 14px */
+  --text-base: 1rem;     /* 16px */
+  --text-lg: 1.125rem;   /* 18px */
+  --text-xl: 1.25rem;    /* 20px */
+  --text-2xl: 1.5rem;    /* 24px */
+  --text-3xl: 1.875rem;  /* 30px */
+  --text-4xl: 2.25rem;   /* 36px */
+  --text-watermark: 11.25rem; /* 180px */
+
+  /* Brand Primary Colors (Logistics Blue) */
+  --color-sushi-primary: #2563eb;
+  --color-sushi-primary-hover: #3b82f6;
+  --color-sushi-primary-dark: #1d4ed8;
+
+  /* Surfaces & Backgrounds (Navy Slate) */
+  --color-sushi-bg: #0b0f19;
+  --color-sushi-surface: #111827;
+  --color-sushi-card: #1e293b;
+  --color-sushi-card-hover: #334155;
+
+  /* Borders */
+  --color-sushi-border: #334155;
+  --color-sushi-border-subtle: #1e293b;
+
+  /* Typography Colors */
+  --color-sushi-text: #f8fafc;
+  --color-sushi-text-muted: #94a3b8;
+  --color-sushi-text-dim: #64748b;
+
+  /* Accents */
+  --color-sushi-gold: #f59e0b;
+  --color-sushi-emerald: #10b981;
+}
+
+:root {
+  --background: var(--color-sushi-bg);
+  --foreground: var(--color-sushi-text);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+/* Đảm bảo text gợi ý (placeholder) sáng rõ, tương phản tốt, không bị chìm tối */
+input::placeholder,
+textarea::placeholder,
+.ant-input::placeholder,
+.ant-input-password input::placeholder {
+  color: #94a3b8 !important;
+  opacity: 1 !important;
+}
+
+/* Khắc phục lỗi trình duyệt tự động điền (Autofill) làm trắng ô input trên nền tối */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-text-fill-color: #f8fafc !important;
+  -webkit-box-shadow: 0 0 0 1000px #1e1e22 inset !important;
+  box-shadow: 0 0 0 1000px #1e1e22 inset !important;
+  transition: background-color 5000s ease-in-out 0s !important;
+}
+
+/* =============================================================================
+   Sushi Admin Sidebar Custom Styling (Dark Luxury Theme)
+   ============================================================================= */
+.sushi-admin-menu.ant-menu {
+  background: transparent !important;
+  border-inline-end: none !important;
+}
+
+.sushi-admin-menu .ant-menu-item {
+  height: 46px !important;
+  line-height: 46px !important;
+  border-radius: 10px !important;
+  margin-inline: 10px !important;
+  margin-block: 6px !important;
+  padding-inline: 14px !important;
+  border: 1px solid transparent !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.sushi-admin-menu .ant-menu-item:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.sushi-admin-menu .ant-menu-item-selected {
+  background: linear-gradient(90deg, rgba(229, 57, 53, 0.18) 0%, rgba(229, 57, 53, 0.06) 100%) !important;
+  border-color: rgba(229, 57, 53, 0.35) !important;
+  box-shadow: 0 4px 14px rgba(229, 57, 53, 0.12) !important;
+  color: #ffffff !important;
+}
+
+.sushi-admin-menu .ant-menu-item-selected .ant-menu-item-icon {
+  color: #ef4444 !important;
+  filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.4));
+}
+
+.sushi-admin-menu .ant-menu-item:not(.ant-menu-item-selected) .ant-menu-item-icon {
+  color: #94a3b8 !important;
+  transition: color 0.2s ease;
+}
+
+.sushi-admin-menu .ant-menu-item:hover:not(.ant-menu-item-selected) .ant-menu-item-icon {
+  color: #cbd5e1 !important;
+}
+
+/* =============================================================================
+   Sushi Admin Profile Dropdown Custom Styling
+   ============================================================================= */
+.sushi-dropdown .ant-dropdown-menu {
+  background-color: #25252a !important;
+  border: 1px solid #36363d !important;
+  border-radius: 14px !important;
+  box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05) !important;
+  padding: 6px !important;
+  min-width: 220px !important;
+}
+
+.sushi-dropdown .ant-dropdown-menu-item {
+  border-radius: 8px !important;
+  padding: 9px 12px !important;
+  font-size: 13px !important;
+  transition: all 0.15s ease !important;
+}
+
+.sushi-dropdown .ant-dropdown-menu-item:hover {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+.sushi-dropdown .ant-dropdown-menu-item-danger {
+  color: #f87171 !important;
+}
+
+.sushi-dropdown .ant-dropdown-menu-item-danger:hover {
+  background-color: rgba(239, 68, 68, 0.12) !important;
+  color: #ef4444 !important;
+}
+
+.sushi-dropdown .ant-dropdown-menu-item-divider {
+  background-color: #36363d !important;
+  margin: 6px 4px !important;
+}
+
+/* =============================================================================
+   Ant Design Select & Dropdown Polish (Dark Luxury Theme)
+   ============================================================================= */
+.ant-select-dropdown {
+  background-color: #25252a !important;
+  border: 1px solid #36363d !important;
+  border-radius: 12px !important;
+  box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05) !important;
+  padding: 6px !important;
+}
+
+.ant-select-dropdown .ant-select-item {
+  border-radius: 8px !important;
+  padding: 8px 12px !important;
+  transition: all 0.15s ease !important;
+  color: #cbd5e1 !important;
+}
+
+.ant-select-dropdown .ant-select-item-option-content {
+  color: inherit !important;
+}
+
+.ant-select-dropdown .ant-select-item-option-active:not(.ant-select-item-option-selected) {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+  color: #ffffff !important;
+}
+
+.ant-select-dropdown .ant-select-item-option-selected,
+.ant-select-dropdown .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
+  background-color: rgba(229, 57, 53, 0.18) !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+}
+
+.ant-select-dropdown .ant-select-item-option-selected .ant-select-item-option-state {
+  color: #ef4444 !important;
+}
+
+.ant-select .ant-select-selector {
+  border-radius: 12px !important;
+  background-color: #1e1e22 !important;
+  border-color: #36363d !important;
+  color: #f8fafc !important;
+  transition: all 0.2s ease !important;
+}
+
+.ant-select:hover .ant-select-selector {
+  border-color: #4b4b54 !important;
+}
+
+.ant-select-focused .ant-select-selector {
+  border-color: rgba(229, 57, 53, 0.6) !important;
+  box-shadow: 0 0 0 2px rgba(229, 57, 53, 0.16) !important;
+}
+
+/* =============================================================================
+   Sushi Mobile Drawer Custom Styling
+   ============================================================================= */
+.sushi-mobile-drawer .ant-drawer-content {
+  background-color: #25252a !important;
+}
+
+.sushi-mobile-drawer .ant-drawer-body {
+  padding: 0 !important;
+  background-color: #25252a !important;
+}
+
+/* =============================================================================
+   Mobile Slide Animations (Direction-aware page transitions)
+   ============================================================================= */
+
+@keyframes mobileSlideInRight {
+  from {
+    opacity: 0.35;
+    transform: translate3d(80px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes mobileSlideInLeft {
+  from {
+    opacity: 0.35;
+    transform: translate3d(-80px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes desktopFadeIn {
+  from {
+    opacity: 0.7;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.mobile-slide-in-right {
+  animation: mobileSlideInRight 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.mobile-slide-in-left {
+  animation: mobileSlideInLeft 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Giữ class tương thích cũ */
+.slide-right {
+  animation: mobileSlideInRight 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.slide-left {
+  animation: mobileSlideInLeft 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (min-width: 768px) {
+  .mobile-slide-in-right,
+  .mobile-slide-in-left,
+  .slide-right,
+  .slide-left {
+    animation: desktopFadeIn 0.15s ease-out both !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mobile-slide-in-right,
+  .mobile-slide-in-left,
+  .slide-right,
+  .slide-left {
+    animation: none !important;
+    transform: none !important;
+  }
+
+  nav[aria-label="Mobile navigation"],
+  nav[aria-label="Mobile navigation"] * {
+    transition: none !important;
+  }
+}
