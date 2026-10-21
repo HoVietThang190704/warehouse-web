@@ -2,7 +2,6 @@ import React from 'react';
 import {
   ChartBar,
   Package,
-  SquaresFour,
   ArrowDown,
   ArrowUp,
   Warehouse,
@@ -73,12 +72,6 @@ export const NAV_ITEMS: readonly NavItem[] = [
     path: APP_ROUTES.PRODUCTS,
     labelKey: 'dashboard.menuProducts',
     icon: Package,
-  },
-  {
-    key: 'categories',
-    path: APP_ROUTES.CATEGORIES,
-    labelKey: 'dashboard.menuCategories',
-    icon: SquaresFour,
   },
 ] as const;
 

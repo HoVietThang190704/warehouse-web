@@ -1,19 +1,16 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Table,
   Tag,
-  Typography,
-  Tooltip,
   ArrowDown,
   ArrowUp,
   User,
   Receipt,
+  Pagination,
 } from '@/components/ui';
 import { StockDocumentItem, StockDocumentType } from '../types';
-
-const { Text } = Typography;
 
 interface StockHistoryTableProps {
   documents: StockDocumentItem[];
@@ -21,6 +18,14 @@ interface StockHistoryTableProps {
 }
 
 export function StockHistoryTable({ documents, loading }: StockHistoryTableProps) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
+
+  // Lấy danh sách chứng từ phân trang cho mobile
+  const paginatedDocuments = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return documents.slice(start, start + pageSize);
+  }, [documents, currentPage, pageSize]);
   const getDocumentTypeMeta = (type: StockDocumentType) => {
     switch (type) {
       case 'PURCHASE_RECEIPT':
@@ -213,19 +218,139 @@ export function StockHistoryTable({ documents, loading }: StockHistoryTableProps
         </div>
       </div>
 
-      <Table
-        dataSource={documents}
-        columns={columns}
-        rowKey="id"
-        loading={loading}
-        pagination={{
-          pageSize: 10,
-          showSizeChanger: false,
-          className: 'px-4 py-2 !text-xs',
-        }}
-        scroll={{ x: 900 }}
-        className="sushi-table"
-      />
+      {/* 1. Mobile Card View: Hiển thị trên màn hình nhỏ (sm:hidden) */}
+      <div className="block sm:hidden p-3 space-y-3">
+        {loading ? (
+          <div className="p-8 text-center text-xs text-sushi-text-dim">
+            Đang tải danh sách chứng từ...
+          </div>
+        ) : documents.length === 0 ? (
+          <div className="p-8 text-center text-xs text-sushi-text-dim">
+            Chưa có chứng từ nhập xuất nào
+          </div>
+        ) : (
+          <>
+            {paginatedDocuments.map((doc) => {
+              const meta = getDocumentTypeMeta(doc.type);
+              const d = new Date(doc.createdAt);
+              const formattedDate = !isNaN(d.getTime())
+                ? `${d.toLocaleDateString('vi-VN', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                  })} ${d.toLocaleTimeString('vi-VN', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}`
+                : '';
+              const unitName = doc.items?.[0]?.product?.baseUnit?.name || 'đơn vị';
+
+              return (
+                <div
+                  key={doc.id}
+                  className="p-3.5 rounded-xl bg-sushi-surface/70 border border-sushi-border/90 space-y-2.5 shadow-sm"
+                >
+                  {/* Header thẻ: Loại chứng từ, Mã & Số lượng */}
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center space-x-1.5 min-w-0">
+                      <Tag
+                        color={meta.color}
+                        className="text-2xs font-bold px-2 py-0.5 rounded-md flex items-center gap-1 shrink-0 m-0"
+                      >
+                        {meta.isInput ? (
+                          <ArrowDown size={12} weight="bold" />
+                        ) : (
+                          <ArrowUp size={12} weight="bold" />
+                        )}
+                        <span>{meta.label}</span>
+                      </Tag>
+                      <span className="font-mono text-2xs font-semibold text-blue-400 bg-blue-500/10 px-1.5 py-0.5 rounded border border-blue-500/20 truncate">
+                        {doc.code}
+                      </span>
+                    </div>
+
+                    <div
+                      className={`font-mono text-sm font-extrabold shrink-0 ${
+                        meta.isInput ? 'text-emerald-400' : 'text-blue-400'
+                      }`}
+                    >
+                      {meta.isInput ? '+' : '-'}
+                      {doc.totalQuantity} {unitName}
+                    </div>
+                  </div>
+
+                  {/* Danh sách mặt hàng trong chứng từ */}
+                  <div className="space-y-1 pt-1 border-t border-sushi-border/60">
+                    {doc.items && doc.items.length > 0 ? (
+                      doc.items.map((item) => (
+                        <div
+                          key={item.id}
+                          className="flex items-center justify-between text-xs"
+                        >
+                          <span className="font-semibold text-white truncate max-w-[200px]">
+                            {item.product?.name || 'Hàng hóa'}
+                          </span>
+                          <span className="text-2xs font-mono text-sushi-text-dim shrink-0">
+                            SKU: {item.product?.sku || 'N/A'}
+                          </span>
+                        </div>
+                      ))
+                    ) : (
+                      <span className="text-2xs text-sushi-text-dim">Không có chi tiết</span>
+                    )}
+                  </div>
+
+                  {/* Ghi chú chứng từ (nếu có) */}
+                  {doc.note && (
+                    <div className="text-2xs text-amber-200/90 bg-amber-500/10 px-2 py-1 rounded-md border border-amber-500/20 italic flex items-start gap-1">
+                      <span className="font-semibold not-italic text-amber-300 shrink-0">Ghi chú:</span>
+                      <span className="line-clamp-2">{doc.note}</span>
+                    </div>
+                  )}
+
+                  {/* Footer thẻ: Ngày giờ */}
+                  <div className="flex items-center justify-between text-2xs font-mono text-sushi-text-dim pt-1 border-t border-sushi-border/40">
+                    <span>Thời gian:</span>
+                    <span className="text-slate-300 font-medium">{formattedDate}</span>
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* Phân trang Mobile */}
+            {documents.length > pageSize && (
+              <div className="pt-2 pb-1 flex justify-center">
+                <Pagination
+                  size="small"
+                  current={currentPage}
+                  pageSize={pageSize}
+                  total={documents.length}
+                  onChange={(page) => setCurrentPage(page)}
+                  showSizeChanger={false}
+                  className="sushi-pagination-mobile !text-xs"
+                />
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* 2. Desktop Table View: Hiển thị trên màn hình vừa và lớn (hidden sm:block) */}
+      <div className="hidden sm:block">
+        <Table
+          dataSource={documents}
+          columns={columns}
+          rowKey="id"
+          loading={loading}
+          pagination={{
+            pageSize: 10,
+            showSizeChanger: false,
+            className: 'px-4 py-2 !text-xs',
+          }}
+          scroll={{ x: 900 }}
+          className="sushi-table"
+        />
+      </div>
     </div>
   );
 }

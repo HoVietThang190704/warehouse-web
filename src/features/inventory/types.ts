@@ -1,4 +1,4 @@
-export type StockStatus = 'HEALTHY' | 'LOW_STOCK' | 'OUT_OF_STOCK';
+export type StockStatus = 'HEALTHY' | 'LOW_STOCK' | 'OUT_OF_STOCK' | 'NOT_RECEIVED';
 
 export interface StockBalanceItem {
   id: string;
