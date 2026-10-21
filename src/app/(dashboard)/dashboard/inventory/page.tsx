@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, Suspense } from 'react';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import {
   SushiButton,
   SushiPageHeader,
@@ -23,8 +24,23 @@ import {
   StockBalanceItem,
 } from '@/features/inventory';
 
-export default function InventoryPage() {
-  const [activeTab, setActiveTab] = useState<'balance' | 'history'>('balance');
+function InventoryContent() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get('tab');
+  const activeTab: 'balance' | 'history' = tabParam === 'history' ? 'history' : 'balance';
+
+  const setActiveTab = (tab: 'balance' | 'history') => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (tab === 'history') {
+      params.set('tab', 'history');
+    } else {
+      params.delete('tab');
+    }
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+  };
   const [search, setSearch] = useState('');
   const [lowStockOnly, setLowStockOnly] = useState(false);
 
@@ -149,7 +165,7 @@ export default function InventoryPage() {
                   className="text-xs font-semibold text-sushi-text select-none flex items-center space-x-1.5"
                 >
                   <WarningCircle size={15} className="text-amber-400" />
-                  <span>Chỉ hiện hàng sắp hết (&le; 5)</span>
+                  <span>Chỉ hiện hàng cần nhập</span>
                 </span>
               </div>
             </div>
@@ -198,5 +214,19 @@ export default function InventoryPage() {
         preselectedItem={selectedItem}
       />
     </div>
+  );
+}
+
+export default function InventoryPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="p-8 text-center text-xs text-sushi-text-dim">
+          Đang tải dữ liệu kho...
+        </div>
+      }
+    >
+      <InventoryContent />
+    </Suspense>
   );
 }

@@ -95,9 +95,6 @@ export function AdminSidebar({
               <span className="font-bold text-sushi-text tracking-wider text-sm font-sans truncate">
                 WAREHOUSE
               </span>
-              <span className="text-2xs text-blue-400 font-semibold tracking-wider font-mono uppercase truncate">
-                Kho Tổng Logistics
-              </span>
             </div>
           )}
         </div>

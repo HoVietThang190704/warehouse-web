@@ -1,6 +1,5 @@
 'use client';
 
-import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -8,33 +7,22 @@ import {
   SushiButton,
   Button,
   Tag,
-  Package,
-  Warehouse,
   ArrowDown,
   ArrowUp,
   WarningCircle,
   CheckCircle,
-  Database,
   ArrowRight,
   ArrowsClockwise,
   Info,
 } from '@/components/ui';
 import {
   useDashboardKpis,
-  StockReceiptModal,
-  StockIssueModal,
-  StockBalanceItem,
 } from '@/features/inventory';
 
 export default function DashboardOverviewPage() {
   const router = useRouter();
   const { data: kpis, isLoading, refetch } = useDashboardKpis();
 
-  const [receiptModalOpen, setReceiptModalOpen] = useState(false);
-  const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
-
-  const totalProducts = kpis?.totalProducts ?? 0;
-  const totalStockUnits = kpis?.totalStockUnits ?? 0;
   const lowStockCount = kpis?.lowStockCount ?? 0;
   const lowStockItems = kpis?.lowStockItems ?? [];
   const recentMovements = kpis?.recentMovements ?? [];
@@ -77,49 +65,8 @@ export default function DashboardOverviewPage() {
         }
       />
 
-      {/* 2. 4 KPI Metric Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Metric 1: Tổng Mã Hàng Hóa */}
-        <div className="p-5 rounded-2xl bg-sushi-card border border-sushi-border/90 hover:border-blue-500/40 transition-all duration-300 shadow-md group">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-sushi-text-muted">
-              Tổng Mã Hàng Hóa
-            </span>
-            <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 group-hover:scale-105 transition-transform">
-              <Package size={20} weight="fill" />
-            </div>
-          </div>
-          <div className="mt-4 flex items-baseline justify-between">
-            <span className="text-3xl font-bold text-white tracking-tight font-sans">
-              {isLoading ? '...' : totalProducts}
-            </span>
-            <span className="text-2xs text-sushi-text-dim font-mono">
-              mặt hàng
-            </span>
-          </div>
-        </div>
-
-        {/* Metric 2: Tổng Lượng Tồn Kho */}
-        <div className="p-5 rounded-2xl bg-sushi-card border border-sushi-border/90 hover:border-emerald-500/40 transition-all duration-300 shadow-md group">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-sushi-text-muted">
-              Tổng Tồn Kho Thực Tế
-            </span>
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover:scale-105 transition-transform">
-              <Warehouse size={20} weight="fill" />
-            </div>
-          </div>
-          <div className="mt-4 flex items-baseline justify-between">
-            <span className="text-3xl font-bold text-emerald-400 tracking-tight font-mono">
-              {isLoading ? '...' : totalStockUnits.toLocaleString()}
-            </span>
-            <span className="text-2xs text-sushi-text-dim font-mono">
-              đơn vị cơ sở
-            </span>
-          </div>
-        </div>
-
-        {/* Metric 3: CẢNH BÁO SẮP HẾT HÀNG (< 5) */}
+      {/* Cảnh báo cần nhập hàng */}
+      <div className="grid grid-cols-1 gap-4">
         <div
           onClick={() => router.push('/dashboard/inventory')}
           className={`p-5 rounded-2xl bg-sushi-card border transition-all duration-300 shadow-md cursor-pointer group ${
@@ -131,7 +78,7 @@ export default function DashboardOverviewPage() {
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-amber-300 flex items-center space-x-1.5">
               {lowStockCount > 0 && <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />}
-              <span>Cảnh Báo Sắp Hết Hàng (&le; 5)</span>
+              <span>Cảnh Báo Cần Nhập Hàng</span>
             </span>
             <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 group-hover:scale-105 transition-transform">
               <WarningCircle size={22} weight="fill" />
@@ -147,26 +94,6 @@ export default function DashboardOverviewPage() {
           </div>
         </div>
 
-        {/* Metric 4: Trạng Thái Hệ Thống */}
-        <div className="p-5 rounded-2xl bg-sushi-card border border-sushi-border/90 hover:border-blue-500/40 transition-all duration-300 shadow-md group">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-sushi-text-muted">
-              Hạ Tầng Dữ Liệu
-            </span>
-            <div className="w-10 h-10 rounded-xl bg-slate-700/50 border border-slate-600/40 flex items-center justify-center text-blue-400 group-hover:scale-105 transition-transform">
-              <Database size={20} weight="fill" />
-            </div>
-          </div>
-          <div className="mt-4 flex flex-col justify-between">
-            <span className="text-sm font-semibold text-white tracking-wide truncate">
-              Kho Tổng Logistics
-            </span>
-            <span className="text-2xs text-emerald-400 font-mono mt-1 flex items-center space-x-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span>Neon Cloud · Postgres Online</span>
-            </span>
-          </div>
-        </div>
       </div>
 
       {/* 3. Phần Trung Tâm: Danh sách Cảnh Báo Sắp Hết Hàng & Biến Động Nhập Xuất */}
@@ -181,17 +108,17 @@ export default function DashboardOverviewPage() {
                 </div>
                 <div>
                   <h3 className="text-base font-bold text-white font-sans">
-                    Mặt Hàng Sắp Hết Cần Nhập Thêm
+                     Mặt Hàng Cần Nhập Thêm
                   </h3>
                   <p className="text-xs text-sushi-text-muted">
-                    Các mặt hàng có số tồn &le; 5 hoặc &le; định mức tối thiểu
+                     Hàng chưa nhập kho, đã hết hoặc chạm định mức tối thiểu
                   </p>
                 </div>
               </div>
 
               <Link
                 href="/dashboard/inventory"
-                className="text-xs text-blue-400 hover:text-blue-300 font-medium flex items-center space-x-1"
+                className="text-xs text-blue-400 hover:text-blue-300 font-medium flex items-center space-x-1 shrink-0 whitespace-nowrap"
               >
                 <span>Xem tất cả</span>
                 <ArrowRight size={14} />
@@ -202,48 +129,51 @@ export default function DashboardOverviewPage() {
               <div className="p-8 text-center rounded-2xl bg-sushi-surface/40 border border-sushi-border/60">
                 <CheckCircle size={32} className="text-emerald-400 mx-auto mb-2" />
                 <p className="text-sm font-medium text-white">Tất cả mặt hàng đều đủ tồn kho an toàn</p>
-                <p className="text-xs text-sushi-text-dim mt-1">Không có sản phẩm nào chạm ngưỡng cảnh báo (&le; 5)</p>
+                <p className="text-xs text-sushi-text-dim mt-1">Không có mặt hàng nào cần nhập thêm</p>
               </div>
             ) : (
               <div className="space-y-2.5">
                 {lowStockItems.map((item) => (
                   <div
                     key={item.id}
-                    className="p-3.5 rounded-xl bg-sushi-surface border border-sushi-border flex items-center justify-between gap-3 hover:border-amber-500/40 transition-colors"
+                    className="p-3.5 rounded-xl bg-sushi-surface border border-sushi-border flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 hover:border-amber-500/40 transition-colors"
                   >
+                    {/* Hàng 1 trên Mobile / Khối trái trên Desktop: Tên hàng, Tag & SKU */}
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center space-x-2">
-                        <span className="text-sm font-semibold text-white truncate font-sans">
+                      <div className="flex items-start justify-between gap-2">
+                        <span className="text-sm font-bold text-white font-sans line-clamp-2 sm:truncate">
                           {item.name}
                         </span>
                         <Tag
-                          color={item.quantity <= 0 ? 'red' : 'gold'}
-                          className="text-2xs font-mono font-bold"
+                          color={item.status === 'OUT_OF_STOCK' ? 'red' : 'gold'}
+                          className="text-2xs font-mono font-bold shrink-0 m-0"
                         >
-                          {item.quantity <= 0 ? 'HẾT HÀNG' : 'SẮP HẾT'}
+                          {item.status === 'NOT_RECEIVED' ? 'CHƯA NHẬP KHO' : item.status === 'OUT_OF_STOCK' ? 'HẾT HÀNG' : 'SẮP HẾT'}
                         </Tag>
                       </div>
-                      <div className="text-2xs text-sushi-text-dim font-mono mt-0.5">
+                      <div className="text-2xs text-sushi-text-dim font-mono mt-1">
                         SKU: {item.sku} · Định mức tối thiểu: {item.minStock}
                       </div>
                     </div>
 
-                    <div className="flex items-center space-x-3 shrink-0">
-                      <div className="text-right font-mono">
-                        <div
+                    {/* Hàng 2 trên Mobile / Khối phải trên Desktop: Số tồn & Nút Nhập ngay */}
+                    <div className="flex items-center justify-between sm:justify-end space-x-3 shrink-0 pt-2 sm:pt-0 border-t border-sushi-border/50 sm:border-t-0">
+                      <div className="text-left sm:text-right font-mono">
+                        <span className="text-2xs text-sushi-text-dim sm:hidden mr-1.5">Tồn:</span>
+                        <span
                           className={`text-base font-extrabold ${
-                            item.quantity <= 0 ? 'text-rose-500' : 'text-amber-400'
+                             item.status === 'OUT_OF_STOCK' ? 'text-rose-500' : 'text-amber-400'
                           }`}
                         >
-                          Tồn: {item.quantity}
-                        </div>
+                          {item.quantity}
+                        </span>
                       </div>
 
                       <Link href={`/dashboard/inventory/in`}>
                         <Button
                           size="small"
                           icon={<ArrowDown size={14} />}
-                          className="bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/40 border-emerald-500/30 text-xs"
+                          className="bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/40 border-emerald-500/30 text-xs font-semibold h-8 px-3"
                         >
                           Nhập ngay
                         </Button>
@@ -269,10 +199,10 @@ export default function DashboardOverviewPage() {
                 <span>Nhật Ký Xuất Nhập Gần Đây</span>
               </h3>
               <Link
-                href="/dashboard/inventory"
+                href="/dashboard/inventory?tab=history"
                 className="text-xs text-blue-400 hover:text-blue-300 font-medium"
               >
-                Sổ cái
+                Lịch sử xuất nhập
               </Link>
             </div>
 
@@ -284,6 +214,16 @@ export default function DashboardOverviewPage() {
               <div className="space-y-3">
                 {recentMovements.slice(0, 5).map((m) => {
                   const isIn = m.type === 'IN';
+                  const formattedDate = m.createdAt
+                    ? new Date(m.createdAt).toLocaleString('vi-VN', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })
+                    : '';
+
                   return (
                     <div
                       key={m.id}
@@ -305,10 +245,12 @@ export default function DashboardOverviewPage() {
                           </div>
                           <div className="text-2xs text-sushi-text-dim font-mono flex items-center gap-1.5 flex-wrap">
                             <span>{m.code || 'CHỨNG TỪ'}</span>
-                            <span>·</span>
-                            <span className="text-slate-300">
-                              Người thực hiện: <strong className="text-white font-medium">{m.performerName || 'Không xác định'}</strong>
-                            </span>
+                            {formattedDate && (
+                              <>
+                                <span>·</span>
+                                <span className="text-slate-300">{formattedDate}</span>
+                              </>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -327,14 +269,6 @@ export default function DashboardOverviewPage() {
                 })}
               </div>
             )}
-          </div>
-
-          <div className="pt-4 mt-4 border-t border-sushi-border/80">
-            <Link href="/dashboard/inventory/in" className="block w-full">
-              <Button block className="h-10 text-xs font-semibold bg-sushi-surface hover:bg-slate-700 border-sushi-border">
-                + Tạo Chứng Từ Nhập Kho Mới
-              </Button>
-            </Link>
           </div>
         </div>
       </div>
