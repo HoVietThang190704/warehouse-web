@@ -142,7 +142,7 @@ export default function DashboardOverviewPage() {
                     <div className="min-w-0 flex-1">
                       <Link
                         href={APP_ROUTES.PRODUCT_DETAIL(item.id)}
-                        className="block font-bold text-emerald-400 hover:text-emerald-300 text-[17px] sm:text-base leading-snug font-sans line-clamp-2 break-words transition-colors text-pretty"
+                        className="block font-bold !text-emerald-400 hover:!text-emerald-300 text-[17px] sm:text-base leading-snug font-sans line-clamp-2 break-words transition-colors text-pretty"
                       >
                         {item.name}
                       </Link>
