@@ -217,11 +217,11 @@ export default function DashboardOverviewPage() {
                   return (
                     <div
                       key={m.id}
-                      className="p-3 rounded-xl bg-sushi-surface/60 border border-sushi-border/80 flex items-center justify-between text-xs"
+                      className="p-3 rounded-xl bg-sushi-surface/60 border border-sushi-border/80 flex items-center justify-between gap-3 text-xs"
                     >
-                      <div className="flex items-center space-x-2.5 min-w-0">
+                      <div className="flex items-center space-x-2.5 min-w-0 flex-1">
                         <div
-                          className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
+                          className={`size-7.5 rounded-lg flex items-center justify-center shrink-0 ${
                             isIn
                               ? 'bg-emerald-500/15 text-emerald-400'
                               : 'bg-blue-500/15 text-blue-400'
@@ -229,16 +229,16 @@ export default function DashboardOverviewPage() {
                         >
                           {isIn ? <ArrowDown size={14} /> : <ArrowUp size={14} />}
                         </div>
-                        <div className="min-w-0">
-                          <div className="font-semibold text-white truncate">
+                        <div className="min-w-0 flex-1">
+                          <div className="font-bold text-white text-[14px] sm:text-xs leading-snug line-clamp-2 sm:truncate break-words text-pretty">
                             {m.productName}
                           </div>
-                          <div className="text-2xs text-sushi-text-dim font-mono flex items-center gap-1.5 flex-wrap">
-                            <span>{m.code || 'CHỨNG TỪ'}</span>
+                          <div className="text-2xs text-sushi-text-dim font-mono flex items-center gap-1.5 flex-wrap mt-0.5">
+                            <span className="hidden sm:inline">{m.code || 'CHỨNG TỪ'}</span>
                             {formattedDate && (
                               <>
-                                <span>·</span>
-                                <span className="text-slate-300">{formattedDate}</span>
+                                <span className="hidden sm:inline">·</span>
+                                <span className="text-slate-300/90">{formattedDate}</span>
                               </>
                             )}
                           </div>
@@ -247,11 +247,11 @@ export default function DashboardOverviewPage() {
 
                       <div className="text-right font-mono shrink-0 pl-2">
                         <div
-                          className={`font-bold ${
+                          className={`font-extrabold text-[15px] sm:text-xs tabular-nums ${
                             isIn ? 'text-emerald-400' : 'text-blue-400'
                           }`}
                         >
-                          {isIn ? '+' : '-'}{m.quantity} {m.unit}
+                          {isIn ? '+' : '-'}{m.quantity} <span className="text-2xs font-normal text-sushi-text-muted">{m.unit}</span>
                         </div>
                       </div>
                     </div>
