@@ -99,19 +99,19 @@ export default function DashboardOverviewPage() {
       {/* 3. Phần Trung Tâm: Danh sách Cảnh Báo Sắp Hết Hàng & Biến Động Nhập Xuất */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column (2 spans): Danh Sách Cần Đặt Hàng Gấp */}
-        <div className="lg:col-span-2 p-6 rounded-3xl bg-sushi-card border border-sushi-border shadow-sm flex flex-col justify-between space-y-4">
+        <div className="lg:col-span-2 p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-sushi-card border border-sushi-border shadow-sm flex flex-col justify-between space-y-4">
           <div>
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center space-x-2.5">
-                <div className="w-8 h-8 rounded-lg bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400">
+            <div className="flex items-center justify-between gap-2.5 mb-3 sm:mb-4">
+              <div className="flex items-center space-x-2.5 min-w-0">
+                <div className="size-8 rounded-lg bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
                   <WarningCircle size={18} weight="bold" />
                 </div>
-                <div>
-                  <h3 className="text-base font-bold text-white font-sans">
-                     Mặt Hàng Cần Nhập Thêm
+                <div className="min-w-0">
+                  <h3 className="text-base font-bold text-white font-sans truncate">
+                    Mặt Hàng Cần Nhập Thêm
                   </h3>
-                  <p className="text-xs text-sushi-text-muted">
-                     Hàng chưa nhập kho, đã hết hoặc chạm định mức tối thiểu
+                  <p className="hidden sm:block text-xs text-sushi-text-muted truncate">
+                    Hàng chưa nhập kho, đã hết hoặc chạm định mức tối thiểu
                   </p>
                 </div>
               </div>
@@ -182,7 +182,7 @@ export default function DashboardOverviewPage() {
         </div>
 
         {/* Right Column: Biến Động Nhập Xuất Gần Nhất */}
-        <div className="p-6 rounded-3xl bg-sushi-card border border-sushi-border shadow-sm flex flex-col justify-between">
+        <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-sushi-card border border-sushi-border shadow-sm flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-base font-bold text-white font-sans flex items-center space-x-2">
