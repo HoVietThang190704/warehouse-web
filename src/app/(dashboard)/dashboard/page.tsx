@@ -136,13 +136,13 @@ export default function DashboardOverviewPage() {
                 {lowStockItems.map((item) => (
                   <div
                     key={item.id}
-                    className="p-3.5 rounded-xl bg-sushi-surface border border-sushi-border flex items-center justify-between gap-3 hover:border-amber-500/40 transition-colors"
+                    className="p-3 sm:p-3.5 rounded-xl bg-sushi-surface/90 border border-sushi-border/90 flex items-center justify-between gap-3 hover:border-amber-500/40 transition-colors"
                   >
                     {/* Khối bên trái: Tên hàng nổi bật & Badge Tồn kho */}
                     <div className="min-w-0 flex-1">
                       <Link
                         href={APP_ROUTES.PRODUCT_DETAIL(item.id)}
-                        className="block font-bold !text-emerald-400 hover:!text-emerald-300 text-[17px] sm:text-base leading-snug font-sans line-clamp-2 break-words transition-colors text-pretty"
+                        className="block font-semibold !text-emerald-300 hover:!text-emerald-200 text-base sm:text-base leading-snug font-sans line-clamp-2 break-words transition-colors text-pretty tracking-tight"
                       >
                         {item.name}
                       </Link>
@@ -164,7 +164,7 @@ export default function DashboardOverviewPage() {
                       <Button
                         size="small"
                         icon={<ArrowDown size={14} />}
-                        className="bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/40 border-emerald-500/30 text-xs font-semibold h-8.5 px-3 flex items-center justify-center gap-1"
+                        className="!bg-emerald-500/15 !text-emerald-300 hover:!bg-emerald-500/25 hover:!text-emerald-200 !border-emerald-500/40 text-xs font-semibold h-8.5 sm:h-8 px-3 rounded-lg flex items-center justify-center gap-1 shadow-xs"
                       >
                         Nhập ngay
                       </Button>
