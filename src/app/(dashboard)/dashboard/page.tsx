@@ -136,39 +136,38 @@ export default function DashboardOverviewPage() {
                 {lowStockItems.map((item) => (
                   <div
                     key={item.id}
-                    className="p-3.5 rounded-xl bg-sushi-surface/90 border border-sushi-border/90 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 hover:border-amber-500/40 transition-colors"
+                    className="p-3 sm:p-3.5 rounded-xl bg-sushi-surface/90 border border-sushi-border/90 flex flex-col gap-2 hover:border-amber-500/40 transition-colors"
                   >
-                    {/* Hàng 1 trên mobile: Tên hàng nổi bật & Badge Tồn kho thẳng hàng */}
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-start justify-between gap-2.5">
-                        <Link
-                          href={APP_ROUTES.PRODUCT_DETAIL(item.id)}
-                          className="block font-semibold !text-emerald-300 hover:!text-emerald-200 text-base leading-snug font-sans line-clamp-2 break-words transition-colors text-pretty tracking-tight flex-1"
-                        >
-                          {item.name}
-                        </Link>
-                        <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold tabular-nums border shrink-0 mt-0.5 ${
-                            item.quantity <= 0
-                              ? 'bg-rose-500/10 border-rose-500/25 text-rose-400'
-                              : 'bg-amber-500/10 border-amber-500/25 text-amber-300 motion-safe:animate-pulse'
-                          }`}
-                        >
-                          Tồn: {item.quantity}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Hàng 2 trên mobile: Nút Nhập ngay full width, trên desktop gọn lại */}
-                    <Link href="/dashboard/inventory/in" className="w-full sm:w-auto shrink-0">
-                      <Button
-                        size="small"
-                        icon={<ArrowDown size={14} />}
-                        className="w-full sm:w-auto !bg-emerald-500/15 !text-emerald-300 hover:!bg-emerald-500/25 hover:!text-emerald-200 !border-emerald-500/40 text-xs font-semibold h-9 sm:h-8 px-3.5 rounded-lg flex items-center justify-center gap-1.5 shadow-xs"
-                      >
-                        Nhập ngay
-                      </Button>
+                    {/* Hàng 1: Tên hàng hóa chiếm trọn dòng trên - nổi bật nhất */}
+                    <Link
+                      href={APP_ROUTES.PRODUCT_DETAIL(item.id)}
+                      className="block font-semibold !text-emerald-300 hover:!text-emerald-200 text-base leading-snug font-sans line-clamp-2 break-words transition-colors text-pretty tracking-tight"
+                    >
+                      {item.name}
                     </Link>
+
+                    {/* Hàng 2: Badge Tồn kho bên trái, nút Nhập ngay chìm bên phải */}
+                    <div className="flex items-center justify-between gap-2 pt-0.5">
+                      <span
+                        className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold tabular-nums border ${
+                          item.quantity <= 0
+                            ? 'bg-rose-500/10 border-rose-500/25 text-rose-400'
+                            : 'bg-amber-500/10 border-amber-500/25 text-amber-300 motion-safe:animate-pulse'
+                        }`}
+                      >
+                        Tồn: {item.quantity}
+                      </span>
+
+                      <Link href="/dashboard/inventory/in" className="shrink-0">
+                        <Button
+                          size="small"
+                          icon={<ArrowDown size={13} className="text-slate-400" />}
+                          className="!bg-slate-800/80 !text-slate-300 hover:!bg-slate-700 hover:!text-white !border-slate-700/80 text-xs font-medium h-7.5 px-2.5 rounded-lg flex items-center justify-center gap-1 transition-colors"
+                        >
+                          Nhập ngay
+                        </Button>
+                      </Link>
+                    </div>
                   </div>
                 ))}
               </div>
