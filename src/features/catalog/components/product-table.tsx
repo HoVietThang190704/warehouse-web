@@ -209,7 +209,7 @@ export function ProductTable({ products, loading, onEdit }: ProductTableProps) {
                 <div className="flex items-start gap-3">
                   <Link
                     href={APP_ROUTES.PRODUCT_DETAIL(prod.id)}
-                    className="w-12 h-12 rounded-xl overflow-hidden border border-sushi-border bg-sushi-surface flex items-center justify-center shrink-0 shadow-sm hover:border-blue-500 transition-colors"
+                    className="size-12 rounded-xl overflow-hidden border border-sushi-border bg-sushi-surface flex items-center justify-center shrink-0 shadow-sm hover:border-blue-500 transition-colors"
                   >
                     {prod.imageUrl ? (
                       <Image
@@ -228,22 +228,22 @@ export function ProductTable({ products, loading, onEdit }: ProductTableProps) {
                   <div className="min-w-0 flex-1">
                     <Link
                       href={APP_ROUTES.PRODUCT_DETAIL(prod.id)}
-                      className="block font-bold text-white text-sm font-sans line-clamp-1 hover:text-blue-400 transition-colors"
+                      className="block font-bold text-white text-[15px] leading-snug font-sans line-clamp-2 break-words hover:text-blue-400 transition-colors text-pretty"
                     >
                       {prod.name}
                     </Link>
 
-                    <div className="flex items-center space-x-1.5 text-2xs text-sushi-text-dim font-mono mt-0.5">
-                      <span className="text-blue-400 font-semibold">SKU: {prod.sku}</span>
+                    <div className="flex items-center space-x-1.5 text-2xs text-sushi-text-dim font-mono mt-1">
+                      <span className="text-blue-400 font-medium">SKU: {prod.sku}</span>
                       {prod.category?.name && (
                         <>
-                          <span>·</span>
+                          <span className="text-sushi-border">·</span>
                           <span className="truncate text-slate-400">{prod.category.name}</span>
                         </>
                       )}
                     </div>
 
-                    <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
+                    <div className="mt-2 flex items-center gap-1.5 flex-wrap">
                       <span
                         className={`inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-2xs font-medium border ${
                           prod.isActive

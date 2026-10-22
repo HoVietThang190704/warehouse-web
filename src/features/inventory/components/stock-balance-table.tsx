@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import {
   Table,
   Typography,
@@ -14,6 +15,7 @@ import {
   ArrowUp,
 } from '@/components/ui';
 import { StockBalanceItem } from '../types';
+import { APP_ROUTES } from '@/config/navigation.config';
 
 const { Text } = Typography;
 
@@ -45,7 +47,10 @@ export function StockBalanceTable({
       key: 'productImage',
       width: 76,
       render: (url: string | null | undefined, record: StockBalanceItem) => (
-        <div className="w-11 h-11 rounded-xl overflow-hidden border border-sushi-border bg-sushi-surface flex items-center justify-center shrink-0 shadow-sm">
+        <Link
+          href={APP_ROUTES.PRODUCT_DETAIL(record.productId)}
+          className="w-11 h-11 rounded-xl overflow-hidden border border-sushi-border bg-sushi-surface flex items-center justify-center shrink-0 shadow-sm hover:border-blue-500 transition-colors"
+        >
           {url ? (
             <Image
               src={url}
@@ -58,7 +63,7 @@ export function StockBalanceTable({
           ) : (
             <Package size={20} className="text-sushi-text-dim" />
           )}
-        </div>
+        </Link>
       ),
     },
     {
@@ -67,9 +72,12 @@ export function StockBalanceTable({
       key: 'productName',
       render: (name: string, record: StockBalanceItem) => (
         <div className="py-1">
-          <Text strong className="text-sushi-text block text-sm font-sans">
+          <Link
+            href={APP_ROUTES.PRODUCT_DETAIL(record.productId)}
+            className="text-white hover:text-blue-400 font-semibold block text-sm font-sans transition-colors"
+          >
             {name}
-          </Text>
+          </Link>
           <div className="flex items-center space-x-2 text-2xs text-sushi-text-dim font-mono mt-0.5">
             <span className="text-blue-400 font-semibold">SKU: {record.productSku}</span>
             {record.productBarcode && (
@@ -245,7 +253,10 @@ export function StockBalanceTable({
                 >
                   {/* Header: Ảnh, Tên, SKU & Trạng thái */}
                   <div className="flex items-start gap-3">
-                    <div className="w-12 h-12 rounded-xl overflow-hidden border border-sushi-border bg-sushi-surface flex items-center justify-center shrink-0 shadow-sm">
+                    <Link
+                      href={APP_ROUTES.PRODUCT_DETAIL(item.productId)}
+                      className="size-12 rounded-xl overflow-hidden border border-sushi-border bg-sushi-surface flex items-center justify-center shrink-0 shadow-sm hover:border-blue-500 transition-colors"
+                    >
                       {item.productImage ? (
                         <Image
                           src={item.productImage}
@@ -258,26 +269,27 @@ export function StockBalanceTable({
                       ) : (
                         <Package size={22} className="text-sushi-text-dim" />
                       )}
-                    </div>
+                    </Link>
 
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-start justify-between gap-1.5">
-                        <span className="font-bold text-white text-sm font-sans line-clamp-1">
-                          {item.productName}
-                        </span>
-                      </div>
+                      <Link
+                        href={APP_ROUTES.PRODUCT_DETAIL(item.productId)}
+                        className="block font-bold text-white text-[15px] leading-snug font-sans line-clamp-2 break-words hover:text-blue-400 transition-colors text-pretty"
+                      >
+                        {item.productName}
+                      </Link>
 
-                      <div className="flex items-center space-x-1.5 text-2xs text-sushi-text-dim font-mono mt-0.5">
-                        <span className="text-blue-400 font-semibold">SKU: {item.productSku}</span>
+                      <div className="flex items-center space-x-1.5 text-2xs text-sushi-text-dim font-mono mt-1">
+                        <span className="text-blue-400 font-medium">SKU: {item.productSku}</span>
                         {item.categoryName && (
                           <>
-                            <span>·</span>
+                            <span className="text-sushi-border">·</span>
                             <span className="truncate text-slate-400">{item.categoryName}</span>
                           </>
                         )}
                       </div>
 
-                      <div className="mt-1.5">
+                      <div className="mt-2">
                         {item.status === 'NOT_RECEIVED' ? (
                           <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-2xs font-semibold bg-amber-500/15 border border-amber-500/40 text-amber-300">
                             <WarningCircle size={12} />
