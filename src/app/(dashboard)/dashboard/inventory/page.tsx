@@ -13,7 +13,10 @@ import {
   WarningCircle,
   Package,
   Receipt,
+  FileArrowDown,
 } from '@/components/ui';
+import { message } from 'antd';
+import ExcelJS from 'exceljs';
 import {
   StockBalanceTable,
   StockHistoryTable,
@@ -22,6 +25,7 @@ import {
   useStockBalances,
   useStockDocuments,
   StockBalanceItem,
+  inventoryApi,
 } from '@/features/inventory';
 
 function InventoryContent() {
@@ -74,6 +78,97 @@ function InventoryContent() {
     setIssueModalOpen(true);
   };
 
+  const [exportLoading, setExportLoading] = useState(false);
+
+  const handleExportExcel = async () => {
+    try {
+      setExportLoading(true);
+      // Luôn lấy toàn bộ danh sách hàng hóa trong kho hiện tại (không áp dụng filter tìm kiếm hay cảnh báo)
+      const allBalances = await inventoryApi.getBalances();
+
+      if (!allBalances || allBalances.length === 0) {
+        message.warning('Không có dữ liệu hàng hóa để xuất file');
+        return;
+      }
+
+      // Khởi tạo workbook bằng ExcelJS để hỗ trợ định dạng tiêu đề in đậm & căn giữa
+      const workbook = new ExcelJS.Workbook();
+      workbook.creator = 'Sushi Warehouse Platform';
+      workbook.created = new Date();
+
+      const worksheet = workbook.addWorksheet('Báo cáo tồn kho', {
+        views: [{ showGridLines: true }],
+      });
+
+      // Thiết lập các cột đúng 3 cột theo yêu cầu
+      worksheet.columns = [
+        { header: 'Tên hàng hóa', key: 'productName', width: 36 },
+        { header: 'Tồn', key: 'quantity', width: 16 },
+        { header: 'Ghi chú', key: 'note', width: 30 },
+      ];
+
+      // Thêm toàn bộ dữ liệu hàng hóa
+      allBalances.forEach((item) => {
+        worksheet.addRow({
+          productName: item.productName || 'Chưa đặt tên',
+          quantity: Number(item.quantity || 0),
+          note: '',
+        });
+      });
+
+      // Định dạng dòng Tiêu đề (Row 1): Times New Roman, In đậm, Căn giữa cả chiều ngang và dọc
+      const headerRow = worksheet.getRow(1);
+      headerRow.height = 26;
+      headerRow.font = {
+        name: 'Times New Roman',
+        size: 11,
+        bold: true,
+        color: { argb: 'FF000000' },
+      };
+      headerRow.alignment = {
+        vertical: 'middle',
+        horizontal: 'center',
+        wrapText: true,
+      };
+
+      // Căn chỉnh nội dung các dòng dữ liệu: Times New Roman, Số lượng căn phải, Tên hàng căn trái
+      worksheet.eachRow((row, rowNumber) => {
+        if (rowNumber > 1) {
+          row.height = 22;
+          row.font = {
+            name: 'Times New Roman',
+            size: 11,
+          };
+          row.getCell(1).alignment = { vertical: 'middle', horizontal: 'left' };
+          row.getCell(2).alignment = { vertical: 'middle', horizontal: 'right' };
+          row.getCell(3).alignment = { vertical: 'middle', horizontal: 'left' };
+        }
+      });
+
+      // Tạo buffer và kích hoạt tải file trên trình duyệt
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
+      const url = window.URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      const dateStr = new Date().toISOString().slice(0, 10);
+      anchor.download = `bao-cao-ton-kho-${dateStr}.xlsx`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+      window.URL.revokeObjectURL(url);
+
+      message.success(`Đã xuất báo cáo ${allBalances.length} mặt hàng thành công!`);
+    } catch (error) {
+      console.error('Lỗi xuất file Excel:', error);
+      message.error('Không thể xuất file Excel. Vui lòng thử lại sau.');
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-5">
       <SushiPageHeader
@@ -81,6 +176,14 @@ function InventoryContent() {
         subtitle="Giám sát tồn kho thực tế, truy vết người thực hiện nhập/xuất và tự động cảnh báo hụt hàng"
         extra={
           <div className="flex items-center space-x-2.5">
+            <SushiButton
+              icon={<FileArrowDown size={16} weight="bold" />}
+              onClick={handleExportExcel}
+              loading={exportLoading}
+              className="!bg-emerald-950/40 hover:!bg-emerald-900/50 !text-emerald-400 hover:!text-emerald-300 !border-emerald-600/40 font-semibold"
+            >
+              Xuất Excel
+            </SushiButton>
             <SushiButton
               type="primary"
               icon={<ArrowDown size={16} weight="bold" />}

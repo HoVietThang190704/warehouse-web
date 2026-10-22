@@ -122,6 +122,7 @@ export {
   Warehouse,
   Bell,
   Warning,
+  FileArrowDown,
 } from '@phosphor-icons/react';
 
 // 4. Các Components được bọc phong cách Sushi Platform cao cấp (Bespoke Wrappers)

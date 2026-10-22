@@ -6,7 +6,6 @@ import {
   SushiPageHeader,
   SushiButton,
   Button,
-  Tag,
   ArrowDown,
   ArrowUp,
   WarningCircle,
@@ -18,6 +17,7 @@ import {
 import {
   useDashboardKpis,
 } from '@/features/inventory';
+import { APP_ROUTES } from '@/config/navigation.config';
 
 export default function DashboardOverviewPage() {
   const router = useRouter();
@@ -99,19 +99,19 @@ export default function DashboardOverviewPage() {
       {/* 3. Phần Trung Tâm: Danh sách Cảnh Báo Sắp Hết Hàng & Biến Động Nhập Xuất */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column (2 spans): Danh Sách Cần Đặt Hàng Gấp */}
-        <div className="lg:col-span-2 p-6 rounded-3xl bg-sushi-card border border-sushi-border shadow-sm flex flex-col justify-between space-y-4">
+        <div className="lg:col-span-2 p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-sushi-card border border-sushi-border shadow-sm flex flex-col justify-between space-y-4">
           <div>
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center space-x-2.5">
-                <div className="w-8 h-8 rounded-lg bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400">
+            <div className="flex items-center justify-between gap-2.5 mb-3 sm:mb-4">
+              <div className="flex items-center space-x-2.5 min-w-0">
+                <div className="size-8 rounded-lg bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
                   <WarningCircle size={18} weight="bold" />
                 </div>
-                <div>
-                  <h3 className="text-base font-bold text-white font-sans">
-                     Mặt Hàng Cần Nhập Thêm
+                <div className="min-w-0">
+                  <h3 className="text-base font-bold text-white font-sans truncate">
+                    Mặt Hàng Cần Nhập Thêm
                   </h3>
-                  <p className="text-xs text-sushi-text-muted">
-                     Hàng chưa nhập kho, đã hết hoặc chạm định mức tối thiểu
+                  <p className="hidden sm:block text-xs text-sushi-text-muted truncate">
+                    Hàng chưa nhập kho, đã hết hoặc chạm định mức tối thiểu
                   </p>
                 </div>
               </div>
@@ -136,44 +136,33 @@ export default function DashboardOverviewPage() {
                 {lowStockItems.map((item) => (
                   <div
                     key={item.id}
-                    className="p-3.5 rounded-xl bg-sushi-surface border border-sushi-border flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 hover:border-amber-500/40 transition-colors"
+                    className="p-3 sm:p-3.5 rounded-xl bg-sushi-surface/90 border border-sushi-border/90 flex flex-col gap-2 hover:border-amber-500/40 transition-colors"
                   >
-                    {/* Hàng 1 trên Mobile / Khối trái trên Desktop: Tên hàng, Tag & SKU */}
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-start justify-between gap-2">
-                        <span className="text-sm font-bold text-white font-sans line-clamp-2 sm:truncate">
-                          {item.name}
-                        </span>
-                        <Tag
-                          color={item.status === 'OUT_OF_STOCK' ? 'red' : 'gold'}
-                          className="text-2xs font-mono font-bold shrink-0 m-0"
-                        >
-                          {item.status === 'NOT_RECEIVED' ? 'CHƯA NHẬP KHO' : item.status === 'OUT_OF_STOCK' ? 'HẾT HÀNG' : 'SẮP HẾT'}
-                        </Tag>
-                      </div>
-                      <div className="text-2xs text-sushi-text-dim font-mono mt-1">
-                        SKU: {item.sku} · Định mức tối thiểu: {item.minStock}
-                      </div>
-                    </div>
+                    {/* Hàng 1: Tên hàng hóa chiếm trọn dòng trên - nổi bật nhất */}
+                    <Link
+                      href={APP_ROUTES.PRODUCT_DETAIL(item.id)}
+                      className="block font-semibold !text-emerald-300 hover:!text-emerald-200 text-base leading-snug font-sans line-clamp-2 break-words transition-colors text-pretty tracking-tight"
+                    >
+                      {item.name}
+                    </Link>
 
-                    {/* Hàng 2 trên Mobile / Khối phải trên Desktop: Số tồn & Nút Nhập ngay */}
-                    <div className="flex items-center justify-between sm:justify-end space-x-3 shrink-0 pt-2 sm:pt-0 border-t border-sushi-border/50 sm:border-t-0">
-                      <div className="text-left sm:text-right font-mono">
-                        <span className="text-2xs text-sushi-text-dim sm:hidden mr-1.5">Tồn:</span>
-                        <span
-                          className={`text-base font-extrabold ${
-                             item.status === 'OUT_OF_STOCK' ? 'text-rose-500' : 'text-amber-400'
-                          }`}
-                        >
-                          {item.quantity}
-                        </span>
-                      </div>
+                    {/* Hàng 2: Badge Tồn kho bên trái, nút Nhập ngay chìm bên phải */}
+                    <div className="flex items-center justify-between gap-2 pt-0.5">
+                      <span
+                        className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold tabular-nums border ${
+                          item.quantity <= 0
+                            ? 'bg-rose-500/10 border-rose-500/25 text-rose-400'
+                            : 'bg-amber-500/10 border-amber-500/25 text-amber-300 motion-safe:animate-pulse'
+                        }`}
+                      >
+                        Tồn: {item.quantity}
+                      </span>
 
-                      <Link href={`/dashboard/inventory/in`}>
+                      <Link href="/dashboard/inventory/in" className="shrink-0">
                         <Button
                           size="small"
-                          icon={<ArrowDown size={14} />}
-                          className="bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/40 border-emerald-500/30 text-xs font-semibold h-8 px-3"
+                          icon={<ArrowDown size={13} className="text-slate-400" />}
+                          className="!bg-slate-800/80 !text-slate-300 hover:!bg-slate-700 hover:!text-white !border-slate-700/80 text-xs font-medium h-7.5 px-2.5 rounded-lg flex items-center justify-center gap-1 transition-colors"
                         >
                           Nhập ngay
                         </Button>
@@ -192,7 +181,7 @@ export default function DashboardOverviewPage() {
         </div>
 
         {/* Right Column: Biến Động Nhập Xuất Gần Nhất */}
-        <div className="p-6 rounded-3xl bg-sushi-card border border-sushi-border shadow-sm flex flex-col justify-between">
+        <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-sushi-card border border-sushi-border shadow-sm flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-base font-bold text-white font-sans flex items-center space-x-2">
@@ -227,11 +216,11 @@ export default function DashboardOverviewPage() {
                   return (
                     <div
                       key={m.id}
-                      className="p-3 rounded-xl bg-sushi-surface/60 border border-sushi-border/80 flex items-center justify-between text-xs"
+                      className="p-3 rounded-xl bg-sushi-surface/60 border border-sushi-border/80 flex items-center justify-between gap-3 text-xs"
                     >
-                      <div className="flex items-center space-x-2.5 min-w-0">
+                      <div className="flex items-center space-x-2.5 min-w-0 flex-1">
                         <div
-                          className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
+                          className={`size-7.5 rounded-lg flex items-center justify-center shrink-0 ${
                             isIn
                               ? 'bg-emerald-500/15 text-emerald-400'
                               : 'bg-blue-500/15 text-blue-400'
@@ -239,16 +228,16 @@ export default function DashboardOverviewPage() {
                         >
                           {isIn ? <ArrowDown size={14} /> : <ArrowUp size={14} />}
                         </div>
-                        <div className="min-w-0">
-                          <div className="font-semibold text-white truncate">
+                        <div className="min-w-0 flex-1">
+                          <div className="font-bold text-white text-[14px] sm:text-xs leading-snug line-clamp-2 sm:truncate break-words text-pretty">
                             {m.productName}
                           </div>
-                          <div className="text-2xs text-sushi-text-dim font-mono flex items-center gap-1.5 flex-wrap">
-                            <span>{m.code || 'CHỨNG TỪ'}</span>
+                          <div className="text-2xs text-sushi-text-dim font-mono flex items-center gap-1.5 flex-wrap mt-0.5">
+                            <span className="hidden sm:inline">{m.code || 'CHỨNG TỪ'}</span>
                             {formattedDate && (
                               <>
-                                <span>·</span>
-                                <span className="text-slate-300">{formattedDate}</span>
+                                <span className="hidden sm:inline">·</span>
+                                <span className="text-slate-300/90">{formattedDate}</span>
                               </>
                             )}
                           </div>
@@ -257,11 +246,11 @@ export default function DashboardOverviewPage() {
 
                       <div className="text-right font-mono shrink-0 pl-2">
                         <div
-                          className={`font-bold ${
+                          className={`font-extrabold text-[15px] sm:text-xs tabular-nums ${
                             isIn ? 'text-emerald-400' : 'text-blue-400'
                           }`}
                         >
-                          {isIn ? '+' : '-'}{m.quantity} {m.unit}
+                          {isIn ? '+' : '-'}{m.quantity} <span className="text-2xs font-normal text-sushi-text-muted">{m.unit}</span>
                         </div>
                       </div>
                     </div>
