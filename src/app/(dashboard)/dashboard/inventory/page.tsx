@@ -175,7 +175,7 @@ function InventoryContent() {
         title="Quản Lý Kho & Sổ Tồn"
         subtitle="Giám sát tồn kho thực tế, truy vết người thực hiện nhập/xuất và tự động cảnh báo hụt hàng"
         extra={
-          <div className="flex items-center space-x-2.5">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
             <SushiButton
               icon={<FileArrowDown size={16} weight="bold" />}
               onClick={handleExportExcel}
