@@ -201,7 +201,7 @@ export function SushiPageHeader({ title, subtitle, extra }: SushiPageHeaderProps
           </p>
         )}
       </div>
-      {extra && <div className="flex flex-wrap items-center gap-2 sm:gap-3">{extra}</div>}
+      {extra && <div className="flex flex-wrap items-center gap-2 sm:gap-3 shrink-0">{extra}</div>}
     </div>
   );
 }
