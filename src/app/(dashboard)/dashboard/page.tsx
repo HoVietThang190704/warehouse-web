@@ -16,12 +16,16 @@ import {
 } from '@/components/ui';
 import {
   useDashboardKpis,
+  useInventorySocket,
 } from '@/features/inventory';
 import { APP_ROUTES } from '@/config/navigation.config';
 
 export default function DashboardOverviewPage() {
   const router = useRouter();
   const { data: kpis, isLoading, refetch } = useDashboardKpis();
+
+  // Kích hoạt kết nối realtime socket cho màn hình Dashboard tổng quan
+  useInventorySocket();
 
   const lowStockCount = kpis?.lowStockCount ?? 0;
   const lowStockItems = kpis?.lowStockItems ?? [];

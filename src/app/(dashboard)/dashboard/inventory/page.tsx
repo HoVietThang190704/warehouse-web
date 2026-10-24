@@ -24,6 +24,7 @@ import {
   StockIssueModal,
   useStockBalances,
   useStockDocuments,
+  useInventorySocket,
   StockBalanceItem,
   inventoryApi,
 } from '@/features/inventory';
@@ -51,6 +52,9 @@ function InventoryContent() {
   const [receiptModalOpen, setReceiptModalOpen] = useState(false);
   const [issueModalOpen, setIssueModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<StockBalanceItem | null>(null);
+
+  // Kích hoạt kết nối realtime socket cho màn hình sổ kho
+  useInventorySocket();
 
   const { data: balances = [], isLoading: balancesLoading } = useStockBalances({
     lowStockOnly,
