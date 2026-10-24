@@ -27,7 +27,7 @@ export function useStockBalances(params?: {
   return useQuery({
     queryKey: inventoryKeys.balances(params),
     queryFn: () => inventoryApi.getBalances(params),
-    refetchInterval: 10000, // Cập nhật lại sau 10s cho live demo
+    refetchInterval: 60000, // Nhịp fallback 60s (thay vì 10s liên tục) vì đã có Socket realtime
   });
 }
 
@@ -42,7 +42,7 @@ export function useDashboardKpis(warehouseId?: string) {
   return useQuery({
     queryKey: inventoryKeys.kpis(warehouseId),
     queryFn: () => inventoryApi.getDashboardKpis(warehouseId),
-    refetchInterval: 10000,
+    refetchInterval: 60000,
   });
 }
 
@@ -50,7 +50,7 @@ export function useStockDocuments(warehouseId?: string) {
   return useQuery({
     queryKey: inventoryKeys.documents(warehouseId),
     queryFn: () => inventoryApi.getDocuments(warehouseId),
-    refetchInterval: 10000,
+    refetchInterval: 60000,
   });
 }
 

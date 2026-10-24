@@ -9,6 +9,7 @@ export {
   useRecordIssue,
   inventoryKeys,
 } from './hooks/use-inventory';
+export { useInventorySocket } from './hooks/use-inventory-socket';
 export { StockBalanceTable } from './components/stock-balance-table';
 export { StockReceiptModal } from './components/stock-receipt-modal';
 export { StockIssueModal } from './components/stock-issue-modal';
