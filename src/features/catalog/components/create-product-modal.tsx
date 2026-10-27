@@ -9,7 +9,6 @@ import {
   InputNumber,
   Select,
   Button,
-  Space,
   ImageSquare,
   Trash,
   Spin,
@@ -19,7 +18,6 @@ import { CreateProductInput } from '../types';
 import { createProductSchema } from '../schemas/catalog.schema';
 import { catalogApi } from '../api/catalog.api';
 import { createZodRule } from '@/lib/zod-validator';
-import { useTranslation } from '@/lib/i18n';
 import { useCategoryOptions, useUnitOptions } from '../hooks/use-categories';
 
 interface CreateProductModalProps {
@@ -33,7 +31,6 @@ export function CreateProductModal({
   onClose,
   onSubmit,
 }: CreateProductModalProps) {
-  const { t } = useTranslation();
   const [form] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -120,7 +117,7 @@ export function CreateProductModal({
         form={form}
         layout="vertical"
         onFinish={handleSubmit}
-        initialValues={{ minStock: 5, costPrice: 0, sellingPrice: 0 }}
+        initialValues={{ minStock: 5, costPrice: 0, sellingPrice: 0, initialQuantity: 0 }}
       >
         {/* Tên hàng */}
         <Form.Item
@@ -176,25 +173,7 @@ export function CreateProductModal({
           </Form.Item>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {/* Ngưỡng cảnh báo tồn tối thiểu */}
-          <Form.Item
-            name="minStock"
-            label={
-              <span className="text-amber-400 font-medium">
-                Ngưỡng cảnh báo (&le;)
-              </span>
-            }
-            rules={[createZodRule(createProductSchema, 'minStock')]}
-            tooltip="Hệ thống sẽ bật cờ vàng và đưa vào danh sách cảnh báo hụt hàng khi tồn kho chạm ngưỡng này (Mặc định: 5)"
-          >
-            <InputNumber<number>
-              style={{ width: '100%' }}
-              min={0}
-              placeholder="5"
-            />
-          </Form.Item>
-
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Giá vốn */}
           <Form.Item
             name="costPrice"
@@ -222,6 +201,46 @@ export function CreateProductModal({
               formatter={(val) => (val ? `${val}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',') : '')}
               parser={(val) => (val ? Number(val.replace(/,/g, '')) : 0)}
               placeholder="0"
+            />
+          </Form.Item>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Số lượng tồn ban đầu */}
+          <Form.Item
+            name="initialQuantity"
+            label={
+              <span className="text-emerald-400 font-medium">
+                Số lượng tồn ban đầu
+              </span>
+            }
+            rules={[createZodRule(createProductSchema, 'initialQuantity')]}
+            tooltip="Số lượng thực tế có sẵn khi tạo hàng. Nếu > 0, hệ thống sẽ tự động ghi sổ tồn kho và tạo chứng từ tồn đầu kỳ tại kho mặc định."
+          >
+            <InputNumber<number>
+              style={{ width: '100%' }}
+              min={0}
+              placeholder="0"
+              formatter={(val) => (val ? `${val}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',') : '0')}
+              parser={(val) => (val ? Number(val.replace(/,/g, '')) : 0)}
+            />
+          </Form.Item>
+
+          {/* Ngưỡng cảnh báo tồn tối thiểu */}
+          <Form.Item
+            name="minStock"
+            label={
+              <span className="text-amber-400 font-medium">
+                Ngưỡng cảnh báo (&le;)
+              </span>
+            }
+            rules={[createZodRule(createProductSchema, 'minStock')]}
+            tooltip="Hệ thống sẽ bật cờ vàng và đưa vào danh sách cảnh báo hụt hàng khi tồn kho chạm ngưỡng này (Mặc định: 5)"
+          >
+            <InputNumber<number>
+              style={{ width: '100%' }}
+              min={0}
+              placeholder="5"
             />
           </Form.Item>
         </div>
