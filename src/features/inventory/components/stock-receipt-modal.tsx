@@ -13,6 +13,7 @@ import {
 import { StockBalanceItem, StockReceiptInput } from '../types';
 import { useRecordReceipt } from '../hooks/use-inventory';
 import { useProducts } from '@/features/catalog';
+import { useTranslation } from '@/lib/i18n';
 
 interface StockReceiptModalProps {
   open: boolean;
@@ -32,6 +33,7 @@ export function StockReceiptModal({
   onClose,
   preselectedItem,
 }: StockReceiptModalProps) {
+  const { t } = useTranslation();
   const [form] = Form.useForm<StockReceiptFormValues>();
   const { data: products = [] } = useProducts();
   const receiptMutation = useRecordReceipt();
@@ -58,7 +60,7 @@ export function StockReceiptModal({
 
   return (
     <Modal
-      title="Tạo Phiếu Nhập Kho Hàng Hóa"
+      title={t('inventory.inTitle')}
       open={open}
       centered
       onCancel={() => {
@@ -81,12 +83,12 @@ export function StockReceiptModal({
       >
         <Form.Item
           name="productId"
-          label="Mặt hàng cần nhập"
-          rules={[{ required: true, message: 'Vui lòng chọn mặt hàng!' }]}
+          label={t('inventory.selectProductToIn')}
+          rules={[{ required: true, message: t('inventory.inQuantityRequired') }]}
         >
           <Select
             showSearch
-            placeholder="Tìm theo tên hoặc mã SKU"
+            placeholder={t('inventory.selectProductPlaceholder')}
             options={productOptions}
             filterOption={(input, option) =>
               (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
@@ -97,13 +99,13 @@ export function StockReceiptModal({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Form.Item
             name="quantity"
-            label="Số lượng nhập"
+            label={t('inventory.inQuantityLabel')}
             rules={[
-              { required: true, message: 'Vui lòng nhập số lượng!' },
+              { required: true, message: t('inventory.inQuantityRequired') },
               {
                 validator: async (_, value) => {
                   if (value && Number(value) <= 0) {
-                    throw new Error('Số lượng nhập phải > 0');
+                    throw new Error(t('inventory.inQuantityMinError'));
                   }
                 },
               },
@@ -118,7 +120,7 @@ export function StockReceiptModal({
 
           <Form.Item
             name="unitCost"
-            label="Đơn giá nhập (VNĐ)"
+            label={t('inventory.unitCostLabel')}
           >
             <InputNumber<number>
               style={{ width: '100%' }}
@@ -131,13 +133,13 @@ export function StockReceiptModal({
           </Form.Item>
         </div>
 
-        <Form.Item name="note" label="Ghi chú phiếu nhập">
-          <Input.TextArea rows={3} placeholder="Ví dụ: Nhập bổ sung từ nhà cung cấp..." />
+        <Form.Item name="note" label={t('inventory.noteLabel')}>
+          <Input.TextArea rows={3} placeholder={t('inventory.notePlaceholder')} />
         </Form.Item>
 
         <div className="flex items-center justify-end space-x-3 pt-3 border-t border-sushi-border/80">
           <Button onClick={onClose} disabled={receiptMutation.isPending}>
-            Hủy
+            {t('common.cancel')}
           </Button>
           <Button
             type="primary"
@@ -145,7 +147,7 @@ export function StockReceiptModal({
             loading={receiptMutation.isPending}
             className="bg-emerald-600 hover:bg-emerald-500 font-semibold px-6"
           >
-            Xác Nhận Nhập Kho
+            {t('inventory.submitIn')}
           </Button>
         </div>
       </Form>

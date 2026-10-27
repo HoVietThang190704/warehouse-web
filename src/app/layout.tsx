@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { AntdRegistry } from '@ant-design/nextjs-registry';
-import { ConfigProvider } from 'antd';
+import { ConfigProvider, App } from 'antd';
 import { antdThemeConfig } from '@/lib/theme';
 import { I18nProvider } from '@/lib/i18n';
 import { QueryProvider } from '@/providers/query-provider';
+import { AntdStaticBridge } from '@/components/ui';
+import vi from '@/locales/vi.json';
 import './globals.css';
 
 const geistSans = Geist({
@@ -18,8 +20,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Warehouse Platform - Quản Lý Kho Hàng',
-  description: 'Hệ thống quản lý kho hàng, xuất nhập tồn và kiểm soát hụt hàng thời gian thực',
+  title: vi.metadata.title,
+  description: vi.metadata.description,
   icons: {
     icon: '/logo.png',
     apple: '/logo.png',
@@ -43,11 +45,14 @@ export default function RootLayout({
       <body className="min-h-screen bg-sushi-bg text-sushi-text antialiased font-sans">
         <AntdRegistry>
           <ConfigProvider theme={antdThemeConfig}>
-            <I18nProvider>
-              <QueryProvider>
-                {children}
-              </QueryProvider>
-            </I18nProvider>
+            <App className="min-h-screen">
+              <AntdStaticBridge />
+              <I18nProvider>
+                <QueryProvider>
+                  {children}
+                </QueryProvider>
+              </I18nProvider>
+            </App>
           </ConfigProvider>
         </AntdRegistry>
       </body>

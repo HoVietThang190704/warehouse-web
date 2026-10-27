@@ -55,7 +55,7 @@ export function EditCategoryModal({
 
   return (
     <Modal
-      title="Chỉnh Sửa Nhóm Hàng Hóa"
+      title={t('dashboard.edit')}
       open={open}
       onCancel={onClose}
       footer={null}
@@ -75,7 +75,7 @@ export function EditCategoryModal({
           <Space>
             <Button onClick={onClose}>{t('common.cancel')}</Button>
             <Button type="primary" htmlType="submit" loading={submitting}>
-              Lưu Thay Đổi
+              {t('products.saveChanges')}
             </Button>
           </Space>
         </Form.Item>

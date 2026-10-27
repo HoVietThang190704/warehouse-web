@@ -16,6 +16,7 @@ import {
 } from '@/components/ui';
 import { StockBalanceItem } from '../types';
 import { APP_ROUTES } from '@/config/navigation.config';
+import { useTranslation } from '@/lib/i18n';
 
 const { Text } = Typography;
 
@@ -32,6 +33,7 @@ export function StockBalanceTable({
   onQuickIn,
   onQuickOut,
 }: StockBalanceTableProps) {
+  const { t } = useTranslation();
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
 
@@ -42,7 +44,7 @@ export function StockBalanceTable({
   }, [balances, currentPage, pageSize]);
   const columns = [
     {
-      title: 'Ảnh',
+      title: t('inventory.tableImage'),
       dataIndex: 'productImage',
       key: 'productImage',
       width: 76,
@@ -67,7 +69,7 @@ export function StockBalanceTable({
       ),
     },
     {
-      title: 'Tên hàng hóa & SKU',
+      title: t('inventory.tableNameSku'),
       dataIndex: 'productName',
       key: 'productName',
       render: (name: string, record: StockBalanceItem) => (
@@ -91,29 +93,29 @@ export function StockBalanceTable({
       ),
     },
     {
-      title: 'Nhóm hàng',
+      title: t('inventory.tableCategory'),
       dataIndex: 'categoryName',
       key: 'categoryName',
       width: 160,
       render: (category: string) => (
         <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-sushi-surface border border-sushi-border text-sushi-text-muted">
-          {category || 'Chưa phân loại'}
+          {category || t('common.uncategorized')}
         </span>
       ),
     },
     {
-      title: 'Đơn vị',
+      title: t('inventory.tableUnit'),
       dataIndex: 'unitName',
       key: 'unitName',
       width: 90,
       render: (unit: string) => (
         <span className="text-xs font-mono font-medium text-slate-300">
-          {unit || 'Cái'}
+          {unit || t('products.unitDefault')}
         </span>
       ),
     },
     {
-      title: 'Số lượng tồn kho',
+      title: t('inventory.tableQuantity'),
       dataIndex: 'quantity',
       key: 'quantity',
       width: 160,
@@ -141,7 +143,7 @@ export function StockBalanceTable({
       },
     },
     {
-      title: 'Ngưỡng cảnh báo',
+      title: t('products.tableMinStock'),
       dataIndex: 'minStock',
       key: 'minStock',
       width: 140,
@@ -152,7 +154,7 @@ export function StockBalanceTable({
       ),
     },
     {
-      title: 'Trạng thái tồn kho',
+      title: t('inventory.tableStatus'),
       dataIndex: 'status',
       key: 'status',
       width: 180,
@@ -161,7 +163,7 @@ export function StockBalanceTable({
           return (
             <span className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/15 border border-amber-500/40 text-amber-300">
               <WarningCircle size={14} />
-              <span>Chưa nhập kho</span>
+              <span>{t('inventory.statusNotReceived')}</span>
             </span>
           );
         }
@@ -170,7 +172,7 @@ export function StockBalanceTable({
           return (
             <span className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-500/15 border border-rose-500/30 text-rose-400">
               <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
-              <span>Hết hàng (0)</span>
+              <span>{t('inventory.statusOut')} (0)</span>
             </span>
           );
         }
@@ -179,7 +181,7 @@ export function StockBalanceTable({
           return (
             <span className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/15 border border-amber-500/40 text-amber-300 shadow-sm animate-pulse">
               <WarningCircle size={14} className="text-amber-400 shrink-0" />
-              <span>Sắp hết (Còn {record.quantity})</span>
+              <span>{t('inventory.statusLow')} ({record.quantity})</span>
             </span>
           );
         }
@@ -187,13 +189,13 @@ export function StockBalanceTable({
         return (
           <span className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
             <CheckCircle size={14} className="text-emerald-400 shrink-0" />
-            <span>Đủ hàng</span>
+            <span>{t('inventory.statusNormal')}</span>
           </span>
         );
       },
     },
     {
-      title: 'Thao tác nhanh',
+      title: t('inventory.tableActions'),
       key: 'actions',
       width: 170,
       align: 'right' as const,
@@ -205,9 +207,9 @@ export function StockBalanceTable({
               icon={<ArrowDown size={14} />}
               onClick={() => onQuickIn(record)}
               className="bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/40 border-emerald-500/30 text-xs"
-              title="Nhập thêm hàng vào kho"
+              title={t('inventory.stockIn')}
             >
-              Nhập
+              {t('inventory.quickIn')}
             </Button>
           )}
 
@@ -218,9 +220,9 @@ export function StockBalanceTable({
               disabled={record.quantity <= 0}
               onClick={() => onQuickOut(record)}
               className="bg-blue-600/20 text-blue-400 hover:bg-blue-600/40 border-blue-500/30 text-xs"
-              title="Xuất kho hàng này"
+              title={t('inventory.stockOut')}
             >
-              Xuất
+              {t('inventory.quickOut')}
             </Button>
           )}
         </div>

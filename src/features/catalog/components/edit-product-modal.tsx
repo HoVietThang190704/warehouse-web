@@ -21,6 +21,7 @@ import { updateProductSchema } from '../schemas/catalog.schema';
 import { catalogApi } from '../api/catalog.api';
 import { createZodRule } from '@/lib/zod-validator';
 import { useCategoryOptions, useUnitOptions } from '../hooks/use-categories';
+import { useTranslation } from '@/lib/i18n';
 
 interface EditProductModalProps {
   open: boolean;
@@ -35,6 +36,7 @@ export function EditProductModal({
   onClose,
   onSubmit,
 }: EditProductModalProps) {
+  const { t } = useTranslation();
   const [form] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -72,12 +74,12 @@ export function EditProductModal({
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      message.error('Vui lòng chọn file hình ảnh (PNG, JPG, WEBP)');
+      message.error(t('products.imageFormatError'));
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      message.error('Kích thước ảnh tối đa là 5MB');
+      message.error(t('products.imageSizeError'));
       return;
     }
 
@@ -86,9 +88,9 @@ export function EditProductModal({
       const result = await catalogApi.uploadImage(file);
       setImageUrl(result.url);
       form.setFieldValue('imageUrl', result.url);
-      message.success('Tải ảnh lên thành công!');
+      message.success(t('products.imageUploadSuccess'));
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Tải ảnh lên thất bại';
+      const msg = err instanceof Error ? err.message : t('products.imageFormatError');
       message.error(msg);
     } finally {
       setUploading(false);
@@ -109,7 +111,7 @@ export function EditProductModal({
 
     const result = updateProductSchema.safeParse(values);
     if (!result.success) {
-      message.error(result.error.issues[0]?.message || 'Dữ liệu không hợp lệ');
+      message.error(result.error.issues[0]?.message || t('products.invalidData'));
       setSubmitting(false);
       return;
     }
@@ -134,7 +136,7 @@ export function EditProductModal({
 
   return (
     <Modal
-      title="Chỉnh Sửa Thông Tin Hàng Hóa"
+      title={t('products.editTitle')}
       open={open}
       onCancel={handleModalClose}
       footer={null}
@@ -160,17 +162,17 @@ export function EditProductModal({
         {/* Tên hàng */}
         <Form.Item
           name="name"
-          label="Tên hàng hóa"
+          label={t('products.nameLabel')}
           rules={[createZodRule(updateProductSchema, 'name')]}
         >
-          <Input placeholder="Tên hàng hóa..." />
+          <Input placeholder={t('products.namePlaceholder')} />
         </Form.Item>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Mã SKU */}
           <Form.Item
             name="sku"
-            label="Mã SKU"
+            label={t('products.skuLabel')}
             tooltip={
               hasInventoryHistory
                 ? 'Không thể sửa vì đã có dữ liệu nhập/xuất kho'
@@ -186,16 +188,16 @@ export function EditProductModal({
           </Form.Item>
 
           {/* Barcode */}
-          <Form.Item name="barcode" label="Mã vạch (Barcode)">
-            <Input placeholder="Mã vạch barcode..." className="font-mono" />
+          <Form.Item name="barcode" label={t('products.barcodeLabel')}>
+            <Input placeholder={t('products.barcodePlaceholder')} className="font-mono" />
           </Form.Item>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Nhóm hàng */}
-          <Form.Item name="categoryId" label="Nhóm hàng">
+          <Form.Item name="categoryId" label={t('products.categoryLabel')}>
             <Select
-              placeholder="Chọn nhóm hàng"
+              placeholder={t('products.categoryPlaceholder')}
               allowClear
               options={categoryOptions}
             />
@@ -204,7 +206,7 @@ export function EditProductModal({
           {/* Đơn vị tính */}
           <Form.Item
             name="baseUnitId"
-            label="Đơn vị tính cơ sở"
+            label={t('products.unitLabel')}
             tooltip={
               hasInventoryHistory
                 ? 'Không thể sửa vì đã có dữ liệu nhập/xuất kho'
@@ -213,7 +215,7 @@ export function EditProductModal({
           >
             <Select
               disabled={hasInventoryHistory}
-              placeholder="Chọn đơn vị tính (Cái, Hộp...)"
+              placeholder={t('products.unitPlaceholder')}
               allowClear
               options={unitOptions}
             />
@@ -226,16 +228,16 @@ export function EditProductModal({
             name="minStock"
             label={
               <span className="text-amber-400 font-medium">
-                Ngưỡng cảnh báo (&le;)
+                {t('products.minStockLabel')}
               </span>
             }
-            tooltip="Báo động khi số lượng tồn thấp hơn hoặc bằng mức này"
+            tooltip={t('products.minStockTooltip')}
           >
             <InputNumber<number> style={{ width: '100%' }} min={0} placeholder="5" />
           </Form.Item>
 
           {/* Giá vốn */}
-          <Form.Item name="costPrice" label="Giá vốn (VNĐ)">
+          <Form.Item name="costPrice" label={t('products.costPriceLabel')}>
             <InputNumber<number>
               style={{ width: '100%' }}
               min={0}
@@ -249,7 +251,7 @@ export function EditProductModal({
           </Form.Item>
 
           {/* Giá bán */}
-          <Form.Item name="sellingPrice" label="Giá bán (VNĐ)">
+          <Form.Item name="sellingPrice" label={t('products.sellingPriceLabel')}>
             <InputNumber<number>
               style={{ width: '100%' }}
               min={0}
@@ -266,19 +268,19 @@ export function EditProductModal({
         {/* Trạng thái hoạt động */}
         <Form.Item
           name="isActive"
-          label="Trạng thái kinh doanh"
+          label={t('common.status')}
           valuePropName="checked"
         >
           <div className="flex items-center space-x-3">
             <Switch defaultChecked />
             <span className="text-xs text-sushi-text-muted">
-              Đang hoạt động (bỏ chọn để tạm ngừng nhập xuất)
+              {t('common.active')}
             </span>
           </div>
         </Form.Item>
 
         {/* Upload Ảnh */}
-        <Form.Item name="imageUrl" label="Hình ảnh sản phẩm">
+        <Form.Item name="imageUrl" label={t('products.imageLabel')}>
           <div className="space-y-3">
             <input
               type="file"

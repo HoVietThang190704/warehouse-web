@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -13,16 +14,22 @@ import {
   ArrowRight,
   ArrowsClockwise,
   Info,
+  CaretLeft,
+  CaretRight,
 } from '@/components/ui';
 import {
   useDashboardKpis,
   useInventorySocket,
 } from '@/features/inventory';
 import { APP_ROUTES } from '@/config/navigation.config';
+import { useTranslation } from '@/lib/i18n';
 
 export default function DashboardOverviewPage() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { data: kpis, isLoading, refetch } = useDashboardKpis();
+  const [lowStockPage, setLowStockPage] = useState(1);
+  const PAGE_SIZE = 5;
 
   // Kích hoạt kết nối realtime socket cho màn hình Dashboard tổng quan
   useInventorySocket();
@@ -31,12 +38,30 @@ export default function DashboardOverviewPage() {
   const lowStockItems = kpis?.lowStockItems ?? [];
   const recentMovements = kpis?.recentMovements ?? [];
 
+  // Ưu tiên hàng hết/chưa nhập (màu đỏ: quantity <= 0) lên trên trước hàng sắp hết (màu vàng: quantity > 0)
+  const sortedLowStockItems = useMemo(() => {
+    return [...lowStockItems].sort((a, b) => {
+      const aIsZero = a.quantity <= 0 ? 0 : 1;
+      const bIsZero = b.quantity <= 0 ? 0 : 1;
+      if (aIsZero !== bIsZero) return aIsZero - bIsZero;
+      return a.quantity - b.quantity;
+    });
+  }, [lowStockItems]);
+
+  const totalPages = Math.ceil(sortedLowStockItems.length / PAGE_SIZE) || 1;
+  const currentPage = Math.min(lowStockPage, totalPages);
+
+  const displayedLowStockItems = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return sortedLowStockItems.slice(start, start + PAGE_SIZE);
+  }, [sortedLowStockItems, currentPage]);
+
   return (
     <div className="space-y-6">
       {/* 1. Header Trang */}
       <SushiPageHeader
-        title="Bảng Điều Khiển Quản Lý Kho"
-        subtitle="Giám sát số lượng tồn kho theo thời gian thực, tự động cảnh báo hụt hàng để đặt hàng kịp thời"
+        title={t('overview.title')}
+        subtitle={t('overview.subtitle')}
         extra={
           <div className="flex items-center space-x-2">
             <Button
@@ -45,7 +70,7 @@ export default function DashboardOverviewPage() {
               loading={isLoading}
               className="hidden sm:inline-flex"
             >
-              Làm mới
+              {t('overview.refresh')}
             </Button>
             <Link href="/dashboard/inventory/in">
               <SushiButton
@@ -53,7 +78,7 @@ export default function DashboardOverviewPage() {
                 icon={<ArrowDown size={16} weight="bold" />}
                 className="bg-emerald-600 hover:bg-emerald-500 font-semibold"
               >
-                Nhập Kho
+                {t('overview.stockIn')}
               </SushiButton>
             </Link>
             <Link href="/dashboard/inventory/out">
@@ -62,7 +87,7 @@ export default function DashboardOverviewPage() {
                 icon={<ArrowUp size={16} weight="bold" />}
                 className="bg-blue-600 hover:bg-blue-500 font-semibold"
               >
-                Xuất Kho
+                {t('overview.stockOut')}
               </SushiButton>
             </Link>
           </div>
@@ -82,7 +107,7 @@ export default function DashboardOverviewPage() {
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-amber-300 flex items-center space-x-1.5">
               {lowStockCount > 0 && <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />}
-              <span>Cảnh Báo Cần Nhập Hàng</span>
+              <span>{t('overview.needRestockAlert')}</span>
             </span>
             <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 group-hover:scale-105 transition-transform">
               <WarningCircle size={22} weight="fill" />
@@ -93,7 +118,7 @@ export default function DashboardOverviewPage() {
               {isLoading ? '...' : lowStockCount}
             </span>
             <span className="text-2xs text-amber-300 font-mono">
-              {lowStockCount > 0 ? 'Cần đặt hàng gấp' : 'Tồn kho an toàn'}
+              {lowStockCount > 0 ? t('overview.needOrderUrgent') : t('overview.stockSafe')}
             </span>
           </div>
         </div>
@@ -112,10 +137,10 @@ export default function DashboardOverviewPage() {
                 </div>
                 <div className="min-w-0">
                   <h3 className="text-base font-bold text-white font-sans truncate">
-                    Mặt Hàng Cần Nhập Thêm
+                    {t('overview.needRestockItems')}
                   </h3>
                   <p className="hidden sm:block text-xs text-sushi-text-muted truncate">
-                    Hàng chưa nhập kho, đã hết hoặc chạm định mức tối thiểu
+                    {t('overview.needRestockSubtitle')}
                   </p>
                 </div>
               </div>
@@ -124,63 +149,93 @@ export default function DashboardOverviewPage() {
                 href="/dashboard/inventory"
                 className="text-xs text-blue-400 hover:text-blue-300 font-medium flex items-center space-x-1 shrink-0 whitespace-nowrap"
               >
-                <span>Xem tất cả</span>
+                <span>{t('overview.viewAll')}</span>
                 <ArrowRight size={14} />
               </Link>
             </div>
 
-            {lowStockItems.length === 0 ? (
+            {sortedLowStockItems.length === 0 ? (
               <div className="p-8 text-center rounded-2xl bg-sushi-surface/40 border border-sushi-border/60">
                 <CheckCircle size={32} className="text-emerald-400 mx-auto mb-2" />
-                <p className="text-sm font-medium text-white">Tất cả mặt hàng đều đủ tồn kho an toàn</p>
-                <p className="text-xs text-sushi-text-dim mt-1">Không có mặt hàng nào cần nhập thêm</p>
+                <p className="text-sm font-medium text-white">{t('overview.allStockSafe')}</p>
+                <p className="text-xs text-sushi-text-dim mt-1">{t('overview.noRestockNeeded')}</p>
               </div>
             ) : (
-              <div className="space-y-2.5">
-                {lowStockItems.map((item) => (
-                  <div
-                    key={item.id}
-                    className="p-3 sm:p-3.5 rounded-xl bg-sushi-surface/90 border border-sushi-border/90 flex flex-col gap-2 hover:border-amber-500/40 transition-colors"
-                  >
-                    {/* Hàng 1: Tên hàng hóa chiếm trọn dòng trên - nổi bật nhất */}
-                    <Link
-                      href={APP_ROUTES.PRODUCT_DETAIL(item.id)}
-                      className="block font-semibold !text-emerald-300 hover:!text-emerald-200 text-base leading-snug font-sans line-clamp-2 break-words transition-colors text-pretty tracking-tight"
+              <>
+                <div className="space-y-2.5">
+                  {displayedLowStockItems.map((item) => (
+                    <div
+                      key={item.id}
+                      className="p-3 sm:p-3.5 rounded-xl bg-sushi-surface/90 border border-sushi-border/90 flex flex-col gap-2 hover:border-amber-500/40 transition-colors"
                     >
-                      {item.name}
-                    </Link>
-
-                    {/* Hàng 2: Badge Tồn kho bên trái, nút Nhập ngay chìm bên phải */}
-                    <div className="flex items-center justify-between gap-2 pt-0.5">
-                      <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold tabular-nums border ${
-                          item.quantity <= 0
-                            ? 'bg-rose-500/10 border-rose-500/25 text-rose-400'
-                            : 'bg-amber-500/10 border-amber-500/25 text-amber-300 motion-safe:animate-pulse'
-                        }`}
+                      {/* Hàng 1: Tên hàng hóa chiếm trọn dòng trên - nổi bật nhất */}
+                      <Link
+                        href={APP_ROUTES.PRODUCT_DETAIL(item.id)}
+                        className="block font-semibold !text-emerald-300 hover:!text-emerald-200 text-base leading-snug font-sans line-clamp-2 break-words transition-colors text-pretty tracking-tight"
                       >
-                        Tồn: {item.quantity}
-                      </span>
-
-                      <Link href="/dashboard/inventory/in" className="shrink-0">
-                        <Button
-                          size="small"
-                          icon={<ArrowDown size={13} className="text-slate-400" />}
-                          className="!bg-slate-800/80 !text-slate-300 hover:!bg-slate-700 hover:!text-white !border-slate-700/80 text-xs font-medium h-7.5 px-2.5 rounded-lg flex items-center justify-center gap-1 transition-colors"
-                        >
-                          Nhập ngay
-                        </Button>
+                        {item.name}
                       </Link>
+
+                      {/* Hàng 2: Badge Tồn kho bên trái, nút Nhập ngay chìm bên phải */}
+                      <div className="flex items-center justify-between gap-2 pt-0.5">
+                        <span
+                          className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold tabular-nums border ${
+                            item.quantity <= 0
+                              ? 'bg-rose-500/10 border-rose-500/25 text-rose-400'
+                              : 'bg-amber-500/10 border-amber-500/25 text-amber-300 motion-safe:animate-pulse'
+                          }`}
+                        >
+                          {t('overview.stock')}: {item.quantity}
+                        </span>
+
+                        <Link href="/dashboard/inventory/in" className="shrink-0">
+                          <Button
+                            size="small"
+                            icon={<ArrowDown size={13} className="text-slate-400" />}
+                            className="!bg-slate-800/80 !text-slate-300 hover:!bg-slate-700 hover:!text-white !border-slate-700/80 text-xs font-medium h-7.5 px-2.5 rounded-lg flex items-center justify-center gap-1 transition-colors"
+                          >
+                            {t('overview.stockInNow')}
+                          </Button>
+                        </Link>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Phân trang gọn: 5 mặt hàng/trang */}
+                {sortedLowStockItems.length > PAGE_SIZE && (
+                  <div className="flex items-center justify-between pt-3 mt-3 border-t border-sushi-border/80 text-xs">
+                    <span className="text-2xs text-sushi-text-dim font-mono">
+                      {Math.min((currentPage - 1) * PAGE_SIZE + 1, sortedLowStockItems.length)}-{Math.min(currentPage * PAGE_SIZE, sortedLowStockItems.length)} / {sortedLowStockItems.length} {t('overview.items')}
+                    </span>
+                    <div className="flex items-center space-x-1.5">
+                      <Button
+                        size="small"
+                        icon={<CaretLeft size={13} />}
+                        disabled={currentPage <= 1}
+                        onClick={() => setLowStockPage((prev) => Math.max(1, prev - 1))}
+                        className="!h-7 !w-7 !p-0 flex items-center justify-center !rounded-lg !bg-sushi-surface/80 hover:!bg-sushi-surface"
+                      />
+                      <span className="text-2xs font-mono text-sushi-text px-1">
+                        {t('overview.pageOf')} {currentPage}/{totalPages}
+                      </span>
+                      <Button
+                        size="small"
+                        icon={<CaretRight size={13} />}
+                        disabled={currentPage >= totalPages}
+                        onClick={() => setLowStockPage((prev) => Math.min(totalPages, prev + 1))}
+                        className="!h-7 !w-7 !p-0 flex items-center justify-center !rounded-lg !bg-sushi-surface/80 hover:!bg-sushi-surface"
+                      />
                     </div>
                   </div>
-                ))}
-              </div>
+                )}
+              </>
             )}
           </div>
 
           <div className="pt-3 border-t border-sushi-border/80 flex items-center gap-1.5 text-2xs text-sushi-text-dim">
             <Info size={13} className="text-sushi-text-muted shrink-0" />
-            <span>Mẹo: Nhập hàng ngay khi có cảnh báo để không bị hụt hàng khi khách đặt đơn.</span>
+            <span>{t('overview.restockTip')}</span>
           </div>
         </div>
 
@@ -189,19 +244,19 @@ export default function DashboardOverviewPage() {
           <div>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-base font-bold text-white font-sans flex items-center space-x-2">
-                <span>Nhật Ký Xuất Nhập Gần Đây</span>
+                <span>{t('overview.recentMovementsTitle')}</span>
               </h3>
               <Link
                 href="/dashboard/inventory?tab=history"
                 className="text-xs text-blue-400 hover:text-blue-300 font-medium"
               >
-                Lịch sử xuất nhập
+                {t('overview.historyLink')}
               </Link>
             </div>
 
             {recentMovements.length === 0 ? (
               <div className="p-8 text-center text-xs text-sushi-text-dim">
-                Chưa có phát sinh nhập xuất nào gần đây
+                {t('overview.noMovementsYet')}
               </div>
             ) : (
               <div className="space-y-3">

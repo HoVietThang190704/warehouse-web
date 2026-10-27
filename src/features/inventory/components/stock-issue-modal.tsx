@@ -12,6 +12,7 @@ import {
 } from '@/components/ui';
 import { StockBalanceItem } from '../types';
 import { useRecordIssue, useStockBalances } from '../hooks/use-inventory';
+import { useTranslation } from '@/lib/i18n';
 
 interface StockIssueModalProps {
   open: boolean;
@@ -31,6 +32,7 @@ export function StockIssueModal({
   onClose,
   preselectedItem,
 }: StockIssueModalProps) {
+  const { t } = useTranslation();
   const [form] = Form.useForm<StockIssueFormValues>();
   const { data: balances = [] } = useStockBalances();
   const issueMutation = useRecordIssue();
@@ -63,7 +65,7 @@ export function StockIssueModal({
 
   const handleFinish = async (values: StockIssueFormValues) => {
     if (isOverStock) {
-      message.error(`Không thể xuất quá số lượng tồn kho khả dụng (${availableQty})`);
+      message.error(`${t('inventory.overStockError')} (${availableQty})`);
       return;
     }
 
@@ -83,7 +85,7 @@ export function StockIssueModal({
 
   return (
     <Modal
-      title="Tạo Phiếu Xuất Kho Hàng Hóa"
+      title={t('inventory.outTitle')}
       open={open}
       centered
       onCancel={() => {
@@ -101,17 +103,17 @@ export function StockIssueModal({
         initialValues={{
           productId: preselectedItem?.productId,
           quantity: 1,
-          reason: 'Xuất bán lẻ',
+          reason: t('inventory.defaultReasonSale'),
         }}
       >
         <Form.Item
           name="productId"
-          label="Mặt hàng cần xuất"
-          rules={[{ required: true, message: 'Vui lòng chọn mặt hàng!' }]}
+          label={t('inventory.selectProductToOut')}
+          rules={[{ required: true, message: t('inventory.selectProductRequired') }]}
         >
           <Select
             showSearch
-            placeholder="Tìm theo tên hoặc mã SKU"
+            placeholder={t('inventory.selectProductOutPlaceholder')}
             options={productOptions}
             onChange={(val) => setSelectedProductId(val)}
             filterOption={(input, option) =>
@@ -131,9 +133,9 @@ export function StockIssueModal({
                 : 'bg-blue-500/10 border-blue-500/30 text-blue-300'
             }`}
           >
-            <span>Số lượng tồn kho khả dụng:</span>
+            <span>{t('inventory.availableStock')}</span>
             <span className="font-extrabold text-sm">
-              {availableQty} {currentItem?.unitName || 'đơn vị'}
+              {availableQty} {currentItem?.unitName || t('inventory.unitsUnit')}
             </span>
           </div>
         )}
@@ -141,22 +143,22 @@ export function StockIssueModal({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Form.Item
             name="quantity"
-            label="Số lượng xuất"
+            label={t('inventory.outQuantityLabel')}
             validateStatus={isOverStock ? 'error' : ''}
             help={
               isOverStock
-                ? `Vượt quá tồn kho! Tối đa chỉ có thể xuất ${availableQty}`
+                ? `${t('inventory.overStockWarning')} (${availableQty})`
                 : undefined
             }
             rules={[
-              { required: true, message: 'Vui lòng nhập số lượng!' },
+              { required: true, message: t('inventory.outQuantityRequired') },
               {
                 validator: async (_, value) => {
                   if (value && Number(value) <= 0) {
-                    throw new Error('Số lượng xuất phải > 0');
+                    throw new Error(t('inventory.inQuantityMinError'));
                   }
                   if (value && Number(value) > availableQty) {
-                    throw new Error(`Tồn kho không đủ (Khả dụng: ${availableQty})`);
+                    throw new Error(`${t('inventory.overStockError')} (${availableQty})`);
                   }
                 },
               },
@@ -172,26 +174,25 @@ export function StockIssueModal({
             />
           </Form.Item>
 
-          <Form.Item name="reason" label="Lý do xuất">
+          <Form.Item name="reason" label={t('inventory.reasonLabel')}>
             <Select
               options={[
-                { value: 'Xuất bán lẻ', label: 'Xuất bán lẻ' },
-                { value: 'Xuất theo đơn đặt hàng', label: 'Xuất theo đơn đặt hàng' },
-                { value: 'Xuất chuyển nội bộ', label: 'Xuất chuyển nội bộ' },
-                { value: 'Xuất kiểm mẫu / Trưng bày', label: 'Xuất kiểm mẫu / Trưng bày' },
-                { value: 'Xuất hủy hỏng', label: 'Xuất hủy hỏng' },
+                { value: 'Xuất bán lẻ', label: t('inventory.defaultReasonSale') },
+                { value: 'Xuất thanh lý / Hỏng', label: t('inventory.reasonDamaged') },
+                { value: 'Xuất dùng nội bộ', label: t('inventory.reasonInternal') },
+                { value: 'Lý do khác', label: t('inventory.reasonOther') },
               ]}
             />
           </Form.Item>
         </div>
 
-        <Form.Item name="note" label="Ghi chú thêm">
-          <Input.TextArea rows={2} placeholder="Ví dụ: Giao cho khách tại quầy..." />
+        <Form.Item name="note" label={t('inventory.colNote')}>
+          <Input.TextArea rows={2} placeholder={t('inventory.outNotePlaceholder')} />
         </Form.Item>
 
         <div className="flex items-center justify-end space-x-3 pt-3 border-t border-sushi-border/80">
           <Button onClick={onClose} disabled={issueMutation.isPending}>
-            Hủy
+            {t('common.cancel')}
           </Button>
           <Button
             type="primary"
@@ -200,7 +201,7 @@ export function StockIssueModal({
             loading={issueMutation.isPending}
             className="bg-blue-600 hover:bg-blue-500 font-semibold px-6 disabled:opacity-50"
           >
-            Xác Nhận Xuất Kho
+            {t('inventory.submitOut')}
           </Button>
         </div>
       </Form>
