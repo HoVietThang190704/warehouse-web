@@ -25,6 +25,8 @@ export const createProductSchema = z.object({
   minStock: z.coerce.number().min(0, 'Ngưỡng tồn tối thiểu phải >= 0').default(5),
   costPrice: z.coerce.number().min(0, 'Giá vốn phải >= 0').default(0),
   sellingPrice: z.coerce.number().min(0, 'Giá bán phải >= 0').default(0),
+  initialQuantity: z.coerce.number().min(0, 'Số lượng ban đầu phải >= 0').default(0),
+  warehouseId: z.string().uuid('Warehouse ID phải là UUID hợp lệ').optional(),
   imageUrl: z.string().optional().or(z.literal('')),
 });
 

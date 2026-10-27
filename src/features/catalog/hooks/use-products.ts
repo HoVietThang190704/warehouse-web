@@ -36,8 +36,9 @@ export function useCreateProduct() {
   return useMutation({
     mutationFn: (dto: CreateProductInput) => catalogApi.createProduct(dto),
     onSuccess: (newProduct: Product) => {
-      // Làm mới toàn bộ cache liên quan tới catalog
+      // Làm mới toàn bộ cache liên quan tới catalog và tồn kho (nếu có khởi tạo tồn đầu kỳ)
       queryClient.invalidateQueries({ queryKey: catalogKeys.all });
+      queryClient.invalidateQueries({ queryKey: ['inventory'] });
       message.success(`Thêm hàng hóa "${newProduct.name}" thành công!`);
     },
     onError: (err: unknown) => {
