@@ -87,8 +87,8 @@ export async function fetchApi<T = unknown>(
     // Trích xuất thông báo lỗi chuẩn từ BaseResponse hoặc lỗi mặc định
     const errorMessage =
       data?.error?.message ||
-      data?.message ||
-      (Array.isArray(data?.message) ? data.message.join(', ') : 'Something went wrong');
+      (Array.isArray(data?.message) ? data.message.join(', ') : data?.message) ||
+      'Something went wrong';
     throw new Error(errorMessage);
   }
 

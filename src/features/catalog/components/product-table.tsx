@@ -13,6 +13,7 @@ import {
 import { Product } from '../types';
 import { useFormatCurrency } from '@/lib/hooks/use-format-currency';
 import { APP_ROUTES } from '@/config/navigation.config';
+import { useTranslation } from '@/lib/i18n';
 
 interface ProductTableProps {
   products: Product[];
@@ -21,6 +22,7 @@ interface ProductTableProps {
 }
 
 export function ProductTable({ products, loading, onEdit }: ProductTableProps) {
+  const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
@@ -33,7 +35,7 @@ export function ProductTable({ products, loading, onEdit }: ProductTableProps) {
 
   const columns = [
     {
-      title: 'Ảnh',
+      title: t('products.tableImage'),
       dataIndex: 'imageUrl',
       key: 'imageUrl',
       width: 76,
@@ -58,7 +60,7 @@ export function ProductTable({ products, loading, onEdit }: ProductTableProps) {
       ),
     },
     {
-      title: 'Tên hàng & Mã SKU',
+      title: t('products.tableNameSku'),
       dataIndex: 'name',
       key: 'name',
       render: (name: string, record: Product) => (
@@ -74,7 +76,7 @@ export function ProductTable({ products, loading, onEdit }: ProductTableProps) {
             {record.barcode && (
               <>
                 <span>·</span>
-                <span>Mã vạch: {record.barcode}</span>
+                <span>{t('products.barcodePrefix')} {record.barcode}</span>
               </>
             )}
           </div>
@@ -82,27 +84,27 @@ export function ProductTable({ products, loading, onEdit }: ProductTableProps) {
       ),
     },
     {
-      title: 'Nhóm hàng',
+      title: t('products.tableCategory'),
       key: 'category',
       width: 170,
       render: (_: unknown, record: Product) => (
         <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-sushi-surface border border-sushi-border text-sushi-text-muted">
-          {record.category?.name || 'Chưa phân loại'}
+          {record.category?.name || t('common.uncategorized')}
         </span>
       ),
     },
     {
-      title: 'Đơn vị',
+      title: t('products.tableUnit'),
       key: 'unit',
       width: 90,
       render: (_: unknown, record: Product) => (
         <span className="text-xs font-mono font-medium text-slate-300">
-          {record.baseUnit?.name || 'Cái'}
+          {record.baseUnit?.name || t('products.unitDefault')}
         </span>
       ),
     },
     {
-      title: 'Ngưỡng cảnh báo',
+      title: t('products.tableMinStock'),
       dataIndex: 'minStock',
       key: 'minStock',
       width: 130,
@@ -113,7 +115,7 @@ export function ProductTable({ products, loading, onEdit }: ProductTableProps) {
       ),
     },
     {
-      title: 'Giá vốn',
+      title: t('products.tableCostPrice'),
       dataIndex: 'costPrice',
       key: 'costPrice',
       width: 130,
@@ -124,7 +126,7 @@ export function ProductTable({ products, loading, onEdit }: ProductTableProps) {
       ),
     },
     {
-      title: 'Giá bán',
+      title: t('products.tableSellingPrice'),
       dataIndex: 'sellingPrice',
       key: 'sellingPrice',
       width: 130,
@@ -135,7 +137,7 @@ export function ProductTable({ products, loading, onEdit }: ProductTableProps) {
       ),
     },
     {
-      title: 'Trạng thái',
+      title: t('products.tableStatus'),
       dataIndex: 'isActive',
       key: 'isActive',
       width: 120,
@@ -152,12 +154,12 @@ export function ProductTable({ products, loading, onEdit }: ProductTableProps) {
               isActive ? 'bg-emerald-500' : 'bg-zinc-500'
             }`}
           />
-          <span>{isActive ? 'Hoạt động' : 'Tạm ngừng'}</span>
+          <span>{isActive ? t('common.active') : t('common.inactive')}</span>
         </span>
       ),
     },
     {
-      title: 'Thao tác',
+      title: t('common.actions'),
       key: 'actions',
       width: 110,
       align: 'right' as const,

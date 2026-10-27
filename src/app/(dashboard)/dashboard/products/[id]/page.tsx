@@ -31,10 +31,12 @@ import {
 } from '@/features/inventory';
 import { useFormatCurrency } from '@/lib/hooks/use-format-currency';
 import { APP_ROUTES } from '@/config/navigation.config';
+import { useTranslation } from '@/lib/i18n';
 
 const { Text } = Typography;
 
 export default function ProductDetailPage() {
+  const { t } = useTranslation();
   const params = useParams();
   const id = params?.id as string;
   const { formatCurrency } = useFormatCurrency();
@@ -51,7 +53,7 @@ export default function ProductDetailPage() {
       <div className="py-24 flex flex-col items-center justify-center space-y-3">
         <Spin size="large" />
         <span className="text-xs text-sushi-text-dim font-mono">
-          Đang tải thông tin hàng hóa...
+          {t('detail.loadingProduct')}
         </span>
       </div>
     );
@@ -61,12 +63,12 @@ export default function ProductDetailPage() {
     return (
       <div className="space-y-4">
         <Link href={APP_ROUTES.PRODUCTS}>
-          <Button icon={<ArrowLeft size={16} />}>Quay lại danh mục</Button>
+          <Button icon={<ArrowLeft size={16} />}>{t('detail.backToCatalog')}</Button>
         </Link>
         <Alert
           type="error"
-          message="Không tìm thấy hàng hóa"
-          description="Hàng hóa không tồn tại hoặc đã bị ngừng hoạt động."
+          message={t('detail.notFound')}
+          description={t('detail.notFoundDesc')}
           showIcon
         />
       </div>
@@ -85,11 +87,11 @@ export default function ProductDetailPage() {
       {/* Header */}
       <SushiPageHeader
         title={product.name}
-        subtitle={`SKU: ${product.sku} · Chi tiết hàng hóa, định mức an toàn và tồn kho theo từng kho`}
+        subtitle={`SKU: ${product.sku} · ${t('products.subtitle')}`}
         extra={
           <div className="flex flex-wrap items-center gap-2">
             <Link href={APP_ROUTES.PRODUCTS}>
-              <Button icon={<ArrowLeft size={16} />}>Quay lại</Button>
+              <Button icon={<ArrowLeft size={16} />}>{t('detail.back')}</Button>
             </Link>
 
             <SushiButton
@@ -98,7 +100,7 @@ export default function ProductDetailPage() {
               onClick={() => setIsEditModalOpen(true)}
               className="bg-blue-600 hover:bg-blue-500 font-semibold"
             >
-              Chỉnh Sửa
+              {t('detail.editBtn')}
             </SushiButton>
 
             <Button
@@ -106,7 +108,7 @@ export default function ProductDetailPage() {
               onClick={() => setReceiptModalOpen(true)}
               className="bg-emerald-600/15 border-emerald-500/30 text-emerald-300 hover:bg-emerald-600/30"
             >
-              Nhập kho
+              {t('detail.stockInBtn')}
             </Button>
 
             <Button
@@ -114,7 +116,7 @@ export default function ProductDetailPage() {
               onClick={() => setIssueModalOpen(true)}
               className="bg-blue-600/15 border-blue-500/30 text-blue-300 hover:bg-blue-600/30"
             >
-              Xuất kho
+              {t('detail.stockOutBtn')}
             </Button>
           </div>
         }

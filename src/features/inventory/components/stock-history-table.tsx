@@ -11,6 +11,7 @@ import {
   Pagination,
 } from '@/components/ui';
 import { StockDocumentItem, StockDocumentType } from '../types';
+import { useTranslation } from '@/lib/i18n';
 
 interface StockHistoryTableProps {
   documents: StockDocumentItem[];
@@ -18,6 +19,7 @@ interface StockHistoryTableProps {
 }
 
 export function StockHistoryTable({ documents, loading }: StockHistoryTableProps) {
+  const { t } = useTranslation();
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
 
@@ -32,21 +34,21 @@ export function StockHistoryTable({ documents, loading }: StockHistoryTableProps
       case 'MANUAL_IN':
       case 'OPENING_BALANCE':
         return {
-          label: 'Nhập kho',
+          label: t('inventory.typeIn'),
           color: 'green',
           isInput: true,
         };
       case 'MANUAL_OUT':
       case 'SALES_ISSUE':
         return {
-          label: 'Xuất kho',
+          label: t('inventory.typeOut'),
           color: 'blue',
           isInput: false,
         };
       case 'ADJUSTMENT':
       default:
         return {
-          label: 'Điều chỉnh',
+          label: t('inventory.typeAdjust'),
           color: 'purple',
           isInput: true,
         };
@@ -55,7 +57,7 @@ export function StockHistoryTable({ documents, loading }: StockHistoryTableProps
 
   const columns = [
     {
-      title: 'Thời gian',
+      title: t('inventory.historyTime'),
       dataIndex: 'createdAt',
       key: 'createdAt',
       width: 150,
@@ -82,7 +84,7 @@ export function StockHistoryTable({ documents, loading }: StockHistoryTableProps
       },
     },
     {
-      title: 'Mã chứng từ',
+      title: t('inventory.historyDocCode'),
       dataIndex: 'code',
       key: 'code',
       width: 140,
@@ -93,7 +95,7 @@ export function StockHistoryTable({ documents, loading }: StockHistoryTableProps
       ),
     },
     {
-      title: 'Loại',
+      title: t('inventory.historyType'),
       dataIndex: 'type',
       key: 'type',
       width: 110,
@@ -115,7 +117,7 @@ export function StockHistoryTable({ documents, loading }: StockHistoryTableProps
       },
     },
     {
-      title: 'Mặt hàng & Chi tiết',
+      title: t('inventory.historyItems'),
       key: 'items',
       render: (_: unknown, record: StockDocumentItem) => {
         if (!record.items || record.items.length === 0) {
@@ -127,7 +129,7 @@ export function StockHistoryTable({ documents, loading }: StockHistoryTableProps
             {record.items.map((item) => (
               <div key={item.id} className="text-xs flex items-center justify-between gap-2">
                 <span className="font-medium text-white truncate max-w-xs">
-                  {item.product?.name || 'Hàng hóa'}
+                  {item.product?.name || t('inventory.colUnnamed')}
                 </span>
                 <span className="text-2xs font-mono text-sushi-text-dim shrink-0">
                   (SKU: {item.product?.sku || 'N/A'})
@@ -139,13 +141,13 @@ export function StockHistoryTable({ documents, loading }: StockHistoryTableProps
       },
     },
     {
-      title: 'Số lượng',
+      title: t('inventory.historyQuantity'),
       key: 'totalQuantity',
       width: 130,
       render: (_: unknown, record: StockDocumentItem) => {
         const meta = getDocumentTypeMeta(record.type);
         const qty = record.totalQuantity;
-        const unitName = record.items?.[0]?.product?.baseUnit?.name || 'đơn vị';
+        const unitName = record.items?.[0]?.product?.baseUnit?.name || t('inventory.unitsUnit');
 
         return (
           <div
@@ -160,12 +162,12 @@ export function StockHistoryTable({ documents, loading }: StockHistoryTableProps
       },
     },
     {
-      title: 'Người thực hiện',
+      title: t('inventory.historyPerformer'),
       key: 'performer',
       width: 180,
       render: (_: unknown, record: StockDocumentItem) => {
-        const performer = record.posterName || record.creatorName || 'Không xác định';
-        const isUnknown = performer === 'Không xác định';
+        const performer = record.posterName || record.creatorName || t('inventory.historyUnknown');
+        const isUnknown = performer === t('inventory.historyUnknown');
 
         return (
           <div className="flex items-center gap-2">

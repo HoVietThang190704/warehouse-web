@@ -49,8 +49,6 @@ export {
   Spin,
   Skeleton,
   Progress,
-  message,
-  notification,
 
   // Navigation (Điều hướng)
   Menu,
@@ -205,3 +203,66 @@ export function SushiPageHeader({ title, subtitle, extra }: SushiPageHeaderProps
     </div>
   );
 }
+
+// 5. Ant Design Context Bridge (Giải quyết triệt để cảnh báo dynamic theme static message)
+import {
+  App as AntdApp,
+  message as antdMessage,
+  notification as antdNotification,
+  Modal as antdModal,
+} from 'antd';
+import type { MessageInstance } from 'antd/es/message/interface';
+import type { NotificationInstance } from 'antd/es/notification/interface';
+import type { ModalStaticFunctions } from 'antd/es/modal/confirm';
+
+let messageInstance: MessageInstance = antdMessage;
+let notificationInstance: NotificationInstance = antdNotification;
+let modalInstance: Omit<ModalStaticFunctions, 'warn'> = antdModal;
+
+/**
+ * Component cầu nối lấy instance context-aware từ <App> của Ant Design
+ * để gán cho các hàm gọi tĩnh message/notification toàn app.
+ */
+export const AntdStaticBridge: React.FC = () => {
+  const staticFunctions = AntdApp.useApp();
+  messageInstance = staticFunctions.message;
+  notificationInstance = staticFunctions.notification;
+  modalInstance = staticFunctions.modal;
+  return null;
+};
+
+export const message: MessageInstance & { useMessage: typeof antdMessage.useMessage } = new Proxy(
+  antdMessage as any,
+  {
+    get(_target, prop: keyof MessageInstance | 'useMessage') {
+      if (prop === 'useMessage') {
+        return antdMessage.useMessage;
+      }
+      return messageInstance[prop as keyof MessageInstance] ?? antdMessage[prop as keyof typeof antdMessage];
+    },
+  }
+);
+
+export const notification: NotificationInstance & { useNotification: typeof antdNotification.useNotification } = new Proxy(
+  antdNotification as any,
+  {
+    get(_target, prop: keyof NotificationInstance | 'useNotification') {
+      if (prop === 'useNotification') {
+        return antdNotification.useNotification;
+      }
+      return notificationInstance[prop as keyof NotificationInstance] ?? antdNotification[prop as keyof typeof antdNotification];
+    },
+  }
+);
+
+export const modal = new Proxy(
+  antdModal as any,
+  {
+    get(_target, prop) {
+      return (modalInstance as any)[prop] ?? (antdModal as any)[prop];
+    },
+  }
+);
+
+export { AntdApp as App };
+

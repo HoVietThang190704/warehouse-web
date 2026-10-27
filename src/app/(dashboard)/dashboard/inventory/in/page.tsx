@@ -18,9 +18,11 @@ import {
 import { useProducts } from '@/features/catalog';
 import { useRecordReceipt, StockReceiptInput } from '@/features/inventory';
 import { APP_ROUTES } from '@/config/navigation.config';
+import { useTranslation } from '@/lib/i18n';
 
 export default function StockInPage() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [form] = Form.useForm<StockReceiptInput>();
   const { data: products = [], isLoading: productsLoading } = useProducts();
   const receiptMutation = useRecordReceipt();
@@ -48,12 +50,12 @@ export default function StockInPage() {
   return (
     <div className="space-y-5 max-w-3xl mx-auto">
       <SushiPageHeader
-        title="Phiếu Nhập Kho Hàng Hóa"
-        subtitle="Ghi nhận lô hàng nhập vào kho, cập nhật tăng số dư tồn kho và ghi sổ cái bất biến"
+        title={t('inventory.inTitle')}
+        subtitle={t('inventory.inSubtitle')}
         extra={
           <Link href={APP_ROUTES.INVENTORY}>
             <Button icon={<ArrowLeft size={16} />}>
-              Quay lại Sổ Tồn
+              {t('inventory.backToLedger')}
             </Button>
           </Link>
         }
@@ -68,12 +70,12 @@ export default function StockInPage() {
         >
           <Form.Item
             name="productId"
-            label="Chọn mặt hàng cần nhập"
-            rules={[{ required: true, message: 'Vui lòng chọn mặt hàng nhập!' }]}
+            label={t('inventory.selectProductToIn')}
+            rules={[{ required: true, message: t('inventory.inQuantityRequired') }]}
           >
             <Select
               showSearch
-              placeholder="Gõ để tìm kiếm theo tên hoặc mã SKU"
+              placeholder={t('inventory.selectProductPlaceholder')}
               loading={productsLoading}
               options={productOptions}
               filterOption={(input, option) =>
@@ -86,13 +88,13 @@ export default function StockInPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Form.Item
               name="quantity"
-              label="Số lượng nhập kho"
+              label={t('inventory.inQuantityLabel')}
               rules={[
-                { required: true, message: 'Vui lòng nhập số lượng!' },
+                { required: true, message: t('inventory.inQuantityRequired') },
                 {
                   validator: async (_, value) => {
                     if (value && Number(value) <= 0) {
-                      throw new Error('Số lượng phải lớn hơn 0');
+                      throw new Error(t('inventory.inQuantityMinError'));
                     }
                   },
                 },
@@ -107,7 +109,7 @@ export default function StockInPage() {
 
             <Form.Item
               name="unitCost"
-              label="Đơn giá vốn nhập (VNĐ)"
+              label={t('inventory.unitCostLabel')}
             >
               <InputNumber<number>
                 style={{ width: '100%' }}
@@ -120,13 +122,13 @@ export default function StockInPage() {
             </Form.Item>
           </div>
 
-          <Form.Item name="note" label="Ghi chú phiếu nhập">
-            <Input.TextArea rows={3} placeholder="Ví dụ: Nhập bổ sung lô hàng từ nhà cung cấp..." />
+          <Form.Item name="note" label={t('inventory.noteLabel')}>
+            <Input.TextArea rows={3} placeholder={t('inventory.notePlaceholder')} />
           </Form.Item>
 
           <div className="flex items-center justify-end space-x-3 pt-4 border-t border-sushi-border/80">
             <Button onClick={() => router.push('/dashboard/inventory')} disabled={receiptMutation.isPending}>
-              Hủy bỏ
+              {t('common.cancel')}
             </Button>
             <SushiButton
               type="primary"
@@ -135,7 +137,7 @@ export default function StockInPage() {
               icon={<ArrowDown size={16} weight="bold" />}
               className="bg-emerald-600 hover:bg-emerald-500 font-semibold px-8"
             >
-              Hoàn Tất Nhập Kho
+              {t('inventory.submitIn')}
             </SushiButton>
           </div>
         </Form>

@@ -14,8 +14,8 @@ import {
   Package,
   Receipt,
   FileArrowDown,
+  message,
 } from '@/components/ui';
-import { message } from 'antd';
 import ExcelJS from 'exceljs';
 import {
   StockBalanceTable,
@@ -28,8 +28,10 @@ import {
   StockBalanceItem,
   inventoryApi,
 } from '@/features/inventory';
+import { useTranslation } from '@/lib/i18n';
 
 function InventoryContent() {
+  const { t } = useTranslation();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -91,7 +93,7 @@ function InventoryContent() {
       const allBalances = await inventoryApi.getBalances();
 
       if (!allBalances || allBalances.length === 0) {
-        message.warning('Không có dữ liệu hàng hóa để xuất file');
+        message.warning(t('inventory.exportNoData'));
         return;
       }
 
@@ -100,21 +102,21 @@ function InventoryContent() {
       workbook.creator = 'Sushi Warehouse Platform';
       workbook.created = new Date();
 
-      const worksheet = workbook.addWorksheet('Báo cáo tồn kho', {
+      const worksheet = workbook.addWorksheet(t('inventory.exportSheetName'), {
         views: [{ showGridLines: true }],
       });
 
       // Thiết lập các cột đúng 3 cột theo yêu cầu
       worksheet.columns = [
-        { header: 'Tên hàng hóa', key: 'productName', width: 36 },
-        { header: 'Tồn', key: 'quantity', width: 16 },
-        { header: 'Ghi chú', key: 'note', width: 30 },
+        { header: t('inventory.colProductName'), key: 'productName', width: 36 },
+        { header: t('inventory.colQuantity'), key: 'quantity', width: 16 },
+        { header: t('inventory.colNote'), key: 'note', width: 30 },
       ];
 
       // Thêm toàn bộ dữ liệu hàng hóa
       allBalances.forEach((item) => {
         worksheet.addRow({
-          productName: item.productName || 'Chưa đặt tên',
+          productName: item.productName || t('inventory.colUnnamed'),
           quantity: Number(item.quantity || 0),
           note: '',
         });
@@ -164,10 +166,10 @@ function InventoryContent() {
       document.body.removeChild(anchor);
       window.URL.revokeObjectURL(url);
 
-      message.success(`Đã xuất báo cáo ${allBalances.length} mặt hàng thành công!`);
+      message.success(t('inventory.exportSuccess'));
     } catch (error) {
       console.error('Lỗi xuất file Excel:', error);
-      message.error('Không thể xuất file Excel. Vui lòng thử lại sau.');
+      message.error(t('inventory.exportError'));
     } finally {
       setExportLoading(false);
     }
@@ -176,8 +178,8 @@ function InventoryContent() {
   return (
     <div className="space-y-5">
       <SushiPageHeader
-        title="Quản Lý Kho & Sổ Tồn"
-        subtitle="Giám sát tồn kho thực tế, truy vết người thực hiện nhập/xuất và tự động cảnh báo hụt hàng"
+        title={t('inventory.title')}
+        subtitle={t('inventory.subtitle')}
         extra={
           <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
             <SushiButton
@@ -186,7 +188,7 @@ function InventoryContent() {
               loading={exportLoading}
               className="!bg-emerald-950/40 hover:!bg-emerald-900/50 !text-emerald-400 hover:!text-emerald-300 !border-emerald-600/40 font-semibold"
             >
-              Xuất Excel
+              {t('inventory.exportExcel')}
             </SushiButton>
             <SushiButton
               type="primary"
@@ -197,7 +199,7 @@ function InventoryContent() {
               }}
               className="bg-emerald-600 hover:bg-emerald-500 font-semibold"
             >
-              Nhập Kho
+              {t('inventory.stockIn')}
             </SushiButton>
             <SushiButton
               type="primary"
@@ -208,7 +210,7 @@ function InventoryContent() {
               }}
               className="bg-blue-600 hover:bg-blue-500 font-semibold"
             >
-              Xuất Kho
+              {t('inventory.stockOut')}
             </SushiButton>
           </div>
         }
@@ -226,7 +228,7 @@ function InventoryContent() {
           }`}
         >
           <Package size={16} weight={activeTab === 'balance' ? 'fill' : 'regular'} />
-          <span>Sổ Tồn Kho Thực Tế ({balances.length})</span>
+          <span>{t('inventory.tabBalances')} ({balances.length})</span>
         </button>
 
         <button
@@ -239,7 +241,7 @@ function InventoryContent() {
           }`}
         >
           <Receipt size={16} weight={activeTab === 'history' ? 'fill' : 'regular'} />
-          <span>Lịch Sử Nhập / Xuất Hàng ({documents.length})</span>
+          <span>{t('inventory.tabHistory')} ({documents.length})</span>
         </button>
       </div>
 
@@ -252,7 +254,7 @@ function InventoryContent() {
               <div className="w-full sm:w-80">
                 <Input
                   prefix={<MagnifyingGlass size={16} className="text-sushi-text-dim" />}
-                  placeholder="Tìm theo tên hàng, mã SKU, barcode..."
+                  placeholder={t('inventory.searchPlaceholder')}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   allowClear
@@ -272,7 +274,7 @@ function InventoryContent() {
                   className="text-xs font-semibold text-sushi-text select-none flex items-center space-x-1.5"
                 >
                   <WarningCircle size={15} className="text-amber-400" />
-                  <span>Chỉ hiện hàng cần nhập</span>
+                  <span>{t('inventory.lowStockFilter')}</span>
                 </span>
               </div>
             </div>
@@ -280,12 +282,12 @@ function InventoryContent() {
             {/* Quick Summary Pill */}
             <div className="flex items-center space-x-4 text-xs font-mono self-end md:self-auto">
               <div>
-                Tổng tồn: <strong className="text-white text-sm">{totalStockUnits}</strong> đơn vị
+                {t('inventory.totalStockUnits')} <strong className="text-white text-sm">{totalStockUnits}</strong> {t('inventory.unitsUnit')}
               </div>
               {lowStockCount > 0 && (
                 <div className="px-2.5 py-1 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 font-semibold flex items-center space-x-1.5 animate-pulse">
                   <WarningCircle size={14} className="text-amber-400 shrink-0" />
-                  <span>Cần nhập:</span>
+                  <span>{t('inventory.needRestockBadge')}</span>
                   <span className="text-sm">{lowStockCount}</span>
                 </div>
               )}

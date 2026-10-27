@@ -17,9 +17,11 @@ import {
 } from '@/components/ui';
 import { useStockBalances, useRecordIssue, StockIssueInput } from '@/features/inventory';
 import { APP_ROUTES } from '@/config/navigation.config';
+import { useTranslation } from '@/lib/i18n';
 
 export default function StockOutPage() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [form] = Form.useForm<StockIssueInput>();
   const { data: balances = [], isLoading } = useStockBalances();
   const issueMutation = useRecordIssue();
@@ -38,7 +40,7 @@ export default function StockOutPage() {
 
   const handleFinish = async (values: StockIssueInput) => {
     if (isOverStock) {
-      message.error(`Không thể xuất quá số lượng tồn kho khả dụng (${availableQty})`);
+      message.error(`${t('inventory.overStockError')} (${availableQty})`);
       return;
     }
 
@@ -59,12 +61,12 @@ export default function StockOutPage() {
   return (
     <div className="space-y-5 max-w-3xl mx-auto">
       <SushiPageHeader
-        title="Phiếu Xuất Kho Hàng Hóa"
-        subtitle="Xuất hàng hóa ra khỏi kho, kiểm soát chống xuất âm và ghi nhận giảm số dư tồn tức thời"
+        title={t('inventory.outTitle')}
+        subtitle={t('inventory.outSubtitle')}
         extra={
           <Link href={APP_ROUTES.INVENTORY}>
             <Button icon={<ArrowLeft size={16} />}>
-              Quay lại Sổ Tồn
+              {t('inventory.backToLedger')}
             </Button>
           </Link>
         }
@@ -75,16 +77,16 @@ export default function StockOutPage() {
           form={form}
           layout="vertical"
           onFinish={handleFinish}
-          initialValues={{ quantity: 1, reason: 'Xuất bán lẻ' }}
+          initialValues={{ quantity: 1, reason: t('inventory.defaultReasonSale') }}
         >
           <Form.Item
             name="productId"
-            label="Mặt hàng cần xuất kho"
-            rules={[{ required: true, message: 'Vui lòng chọn mặt hàng xuất!' }]}
+            label={t('inventory.selectProductToOut')}
+            rules={[{ required: true, message: t('inventory.selectProductRequired') }]}
           >
             <Select
               showSearch
-              placeholder="Chọn mặt hàng từ kho"
+              placeholder={t('inventory.selectProductOutPlaceholder')}
               loading={isLoading}
               options={productOptions}
               onChange={(val) => setSelectedProductId(val)}
@@ -106,9 +108,9 @@ export default function StockOutPage() {
                   : 'bg-blue-500/10 border-blue-500/30 text-blue-300'
               }`}
             >
-              <span>Số lượng tồn kho khả dụng:</span>
+              <span>{t('inventory.availableStock')}</span>
               <span className="font-extrabold text-base">
-                {availableQty} {currentItem?.unitName || 'đơn vị'}
+                {availableQty} {currentItem?.unitName || t('inventory.unitsUnit')}
               </span>
             </div>
           )}
@@ -116,22 +118,22 @@ export default function StockOutPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Form.Item
               name="quantity"
-              label="Số lượng xuất"
+              label={t('inventory.outQuantityLabel')}
               validateStatus={isOverStock ? 'error' : ''}
               help={
                 isOverStock
-                  ? `Vượt quá tồn khả dụng! Tối đa chỉ có thể xuất ${availableQty}`
+                  ? t('inventory.overStockWarning')
                   : undefined
               }
               rules={[
-                { required: true, message: 'Vui lòng nhập số lượng!' },
+                { required: true, message: t('inventory.outQuantityRequired') },
                 {
                   validator: async (_, value) => {
                     if (value && Number(value) <= 0) {
-                      throw new Error('Số lượng xuất phải lớn hơn 0');
+                      throw new Error(t('inventory.inQuantityMinError'));
                     }
                     if (value && Number(value) > availableQty) {
-                      throw new Error(`Tồn kho không đủ (Khả dụng: ${availableQty})`);
+                      throw new Error(t('inventory.overStockWarning'));
                     }
                   },
                 },
@@ -147,26 +149,25 @@ export default function StockOutPage() {
               />
             </Form.Item>
 
-            <Form.Item name="reason" label="Lý do xuất kho">
+            <Form.Item name="reason" label={t('inventory.reasonLabel')}>
               <Select
                 options={[
-                  { value: 'Xuất bán lẻ', label: 'Xuất bán lẻ' },
-                  { value: 'Xuất theo đơn đặt hàng', label: 'Xuất theo đơn đặt hàng' },
-                  { value: 'Xuất chuyển kho nội bộ', label: 'Xuất chuyển kho nội bộ' },
-                  { value: 'Xuất mẫu thử nghiệm', label: 'Xuất mẫu thử nghiệm' },
-                  { value: 'Xuất thanh lý / Hỏng', label: 'Xuất thanh lý / Hỏng' },
+                  { value: 'Xuất bán lẻ', label: t('inventory.defaultReasonSale') },
+                  { value: 'Xuất thanh lý / Hỏng', label: t('inventory.reasonDamaged') },
+                  { value: 'Xuất dùng nội bộ', label: t('inventory.reasonInternal') },
+                  { value: 'Lý do khác', label: t('inventory.reasonOther') },
                 ]}
               />
             </Form.Item>
           </div>
 
-          <Form.Item name="note" label="Ghi chú phiếu xuất">
-            <Input.TextArea rows={3} placeholder="Ví dụ: Xuất cho khách hàng theo yêu cầu..." />
+          <Form.Item name="note" label={t('inventory.colNote')}>
+            <Input.TextArea rows={3} placeholder={t('inventory.outNotePlaceholder')} />
           </Form.Item>
 
           <div className="flex items-center justify-end space-x-3 pt-4 border-t border-sushi-border/80">
             <Button onClick={() => router.push('/dashboard/inventory')} disabled={issueMutation.isPending}>
-              Hủy bỏ
+              {t('common.cancel')}
             </Button>
             <SushiButton
               type="primary"
@@ -176,7 +177,7 @@ export default function StockOutPage() {
               icon={<ArrowUp size={16} weight="bold" />}
               className="bg-blue-600 hover:bg-blue-500 font-semibold px-8 disabled:opacity-40"
             >
-              Xác Nhận Xuất Kho
+              {t('inventory.submitOut')}
             </SushiButton>
           </div>
         </Form>

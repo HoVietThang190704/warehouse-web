@@ -19,6 +19,7 @@ import { createProductSchema } from '../schemas/catalog.schema';
 import { catalogApi } from '../api/catalog.api';
 import { createZodRule } from '@/lib/zod-validator';
 import { useCategoryOptions, useUnitOptions } from '../hooks/use-categories';
+import { useTranslation } from '@/lib/i18n';
 
 interface CreateProductModalProps {
   open: boolean;
@@ -31,6 +32,7 @@ export function CreateProductModal({
   onClose,
   onSubmit,
 }: CreateProductModalProps) {
+  const { t } = useTranslation();
   const [form] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -44,12 +46,12 @@ export function CreateProductModal({
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      message.error('Vui lòng chọn file hình ảnh (PNG, JPG, WEBP)');
+      message.error(t('products.imageFormatError'));
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      message.error('Kích thước ảnh tối đa là 5MB');
+      message.error(t('products.imageSizeError'));
       return;
     }
 
@@ -58,9 +60,9 @@ export function CreateProductModal({
       const result = await catalogApi.uploadImage(file);
       setImageUrl(result.url);
       form.setFieldValue('imageUrl', result.url);
-      message.success('Tải ảnh lên thành công!');
+      message.success(t('products.imageUploadSuccess'));
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Tải ảnh lên thất bại';
+      const msg = err instanceof Error ? err.message : t('products.imageFormatError');
       message.error(msg);
     } finally {
       setUploading(false);
@@ -80,7 +82,7 @@ export function CreateProductModal({
 
     const result = createProductSchema.safeParse(values);
     if (!result.success) {
-      message.error(result.error.issues[0]?.message || 'Dữ liệu không hợp lệ');
+      message.error(result.error.issues[0]?.message || t('products.invalidData'));
       setSubmitting(false);
       return;
     }
@@ -105,7 +107,7 @@ export function CreateProductModal({
 
   return (
     <Modal
-      title="Thêm Hàng Hóa Mới Vào Kho"
+      title={t('products.createTitle')}
       open={open}
       onCancel={handleModalClose}
       footer={null}
@@ -122,28 +124,28 @@ export function CreateProductModal({
         {/* Tên hàng */}
         <Form.Item
           name="name"
-          label="Tên hàng hóa"
+          label={t('products.nameLabel')}
           rules={[createZodRule(createProductSchema, 'name')]}
         >
-          <Input placeholder="Ví dụ: Pin sạc dự phòng 20000mAh..." />
+          <Input placeholder={t('products.namePlaceholder')} />
         </Form.Item>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Mã SKU */}
           <Form.Item
             name="sku"
-            label="Mã SKU"
+            label={t('products.skuLabel')}
             rules={[createZodRule(createProductSchema, 'sku')]}
           >
-            <Input placeholder="Ví dụ: SP-PIN-01" className="uppercase font-mono" />
+            <Input placeholder={t('products.skuPlaceholder')} className="uppercase font-mono" />
           </Form.Item>
 
           {/* Barcode */}
           <Form.Item
             name="barcode"
-            label="Mã vạch (Barcode)"
+            label={t('products.barcodeLabel')}
           >
-            <Input placeholder="893000..." className="font-mono" />
+            <Input placeholder={t('products.barcodePlaceholder')} className="font-mono" />
           </Form.Item>
         </div>
 
@@ -151,10 +153,10 @@ export function CreateProductModal({
           {/* Nhóm hàng */}
           <Form.Item
             name="categoryId"
-            label="Nhóm hàng"
+            label={t('products.categoryLabel')}
           >
             <Select
-              placeholder="Chọn nhóm hàng"
+              placeholder={t('products.categoryPlaceholder')}
               allowClear
               options={categoryOptions}
             />
@@ -163,10 +165,10 @@ export function CreateProductModal({
           {/* Đơn vị tính */}
           <Form.Item
             name="baseUnitId"
-            label="Đơn vị tính cơ sở"
+            label={t('products.unitLabel')}
           >
             <Select
-              placeholder="Chọn đơn vị tính (Cái, Hộp...)"
+              placeholder={t('products.unitPlaceholder')}
               allowClear
               options={unitOptions}
             />
@@ -177,7 +179,7 @@ export function CreateProductModal({
           {/* Giá vốn */}
           <Form.Item
             name="costPrice"
-            label="Giá vốn ước tính (VNĐ)"
+            label={t('products.costPriceLabel')}
           >
             <InputNumber<number>
               style={{ width: '100%' }}
@@ -192,7 +194,7 @@ export function CreateProductModal({
           {/* Giá bán */}
           <Form.Item
             name="sellingPrice"
-            label="Giá bán (VNĐ)"
+            label={t('products.sellingPriceLabel')}
           >
             <InputNumber<number>
               style={{ width: '100%' }}
@@ -211,11 +213,11 @@ export function CreateProductModal({
             name="initialQuantity"
             label={
               <span className="text-emerald-400 font-medium">
-                Số lượng tồn ban đầu
+                {t('products.initialStockLabel')}
               </span>
             }
             rules={[createZodRule(createProductSchema, 'initialQuantity')]}
-            tooltip="Số lượng thực tế có sẵn khi tạo hàng. Nếu > 0, hệ thống sẽ tự động ghi sổ tồn kho và tạo chứng từ tồn đầu kỳ tại kho mặc định."
+            tooltip={t('products.initialStockTooltip')}
           >
             <InputNumber<number>
               style={{ width: '100%' }}
@@ -231,11 +233,11 @@ export function CreateProductModal({
             name="minStock"
             label={
               <span className="text-amber-400 font-medium">
-                Ngưỡng cảnh báo (&le;)
+                {t('products.minStockLabel')}
               </span>
             }
             rules={[createZodRule(createProductSchema, 'minStock')]}
-            tooltip="Hệ thống sẽ bật cờ vàng và đưa vào danh sách cảnh báo hụt hàng khi tồn kho chạm ngưỡng này (Mặc định: 5)"
+            tooltip={t('products.minStockTooltip')}
           >
             <InputNumber<number>
               style={{ width: '100%' }}
@@ -248,7 +250,7 @@ export function CreateProductModal({
         {/* Upload Ảnh */}
         <Form.Item
           name="imageUrl"
-          label="Hình ảnh sản phẩm (Cloudinary)"
+          label={t('products.imageLabel')}
         >
           <div className="space-y-3">
             <input
@@ -287,7 +289,7 @@ export function CreateProductModal({
                     onClick={() => fileInputRef.current?.click()}
                     disabled={uploading}
                   >
-                    Đổi ảnh
+                    {t('dashboard.edit')}
                   </Button>
                   <Button
                     size="small"
@@ -305,7 +307,7 @@ export function CreateProductModal({
                 {uploading ? (
                   <div className="flex flex-col items-center justify-center space-y-2 py-2">
                     <Spin size="small" />
-                    <span className="text-xs text-sushi-text-dim font-mono">Đang tải ảnh lên Cloudinary...</span>
+                    <span className="text-xs text-sushi-text-dim font-mono">{t('products.uploading')}</span>
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center space-y-2">
@@ -314,9 +316,9 @@ export function CreateProductModal({
                     </div>
                     <div>
                       <span className="text-xs font-semibold text-sushi-text group-hover:text-blue-400 transition-colors">
-                        Bấm để tải ảnh lên
+                        {t('products.uploadImage')}
                       </span>
-                      <p className="text-2xs text-sushi-text-dim mt-0.5">PNG, JPG, WEBP tối đa 5MB</p>
+                      <p className="text-2xs text-sushi-text-dim mt-0.5">{t('products.imageHelp')}</p>
                     </div>
                   </div>
                 )}
@@ -328,7 +330,7 @@ export function CreateProductModal({
         {/* Modal Actions */}
         <div className="sticky bottom-0 bg-sushi-card/95 backdrop-blur-md pt-3.5 pb-1 -mx-2 px-2 mt-4 border-t border-sushi-border/80 flex items-center justify-end space-x-3 z-10">
           <Button onClick={handleModalClose} disabled={submitting}>
-            Hủy
+            {t('common.cancel')}
           </Button>
           <Button
             type="primary"
@@ -336,7 +338,7 @@ export function CreateProductModal({
             loading={submitting}
             className="bg-blue-600 hover:bg-blue-500 font-semibold px-6"
           >
-            Lưu Hàng Hóa
+            {t('common.create')}
           </Button>
         </div>
       </Form>

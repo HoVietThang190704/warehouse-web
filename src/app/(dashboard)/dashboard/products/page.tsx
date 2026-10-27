@@ -51,8 +51,8 @@ export default function ProductsPage() {
   return (
     <div className="space-y-5">
       <SushiPageHeader
-        title="Danh Mục Hàng Hóa"
-        subtitle="Quản lý toàn bộ danh sách hàng hóa trong kho, mã vạch và định mức tồn kho tối thiểu"
+        title={t('products.title')}
+        subtitle={t('products.subtitle')}
         extra={
           <SushiButton
             type="primary"
@@ -60,7 +60,7 @@ export default function ProductsPage() {
             onClick={() => setIsCreateModalOpen(true)}
             className="bg-blue-600 hover:bg-blue-500 font-semibold"
           >
-            Thêm Hàng Hóa Mới
+            {t('products.addProduct')}
           </SushiButton>
         }
       />
@@ -72,7 +72,7 @@ export default function ProductsPage() {
           <div className="w-full sm:w-80">
             <Input
               prefix={<MagnifyingGlass size={16} className="text-sushi-text-dim" />}
-              placeholder="Tìm theo tên hàng, mã SKU, barcode..."
+              placeholder={t('products.searchPlaceholder')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               allowClear
@@ -83,7 +83,7 @@ export default function ProductsPage() {
           {/* Lọc theo Nhóm Hàng */}
           <div className="w-full sm:w-56">
             <Select
-              placeholder="Tất cả nhóm hàng"
+              placeholder={t('products.allCategories')}
               value={selectedCategoryId}
               onChange={setSelectedCategoryId}
               allowClear
@@ -95,7 +95,7 @@ export default function ProductsPage() {
 
         {/* Tổng số sản phẩm hiển thị */}
         <div className="text-xs text-sushi-text-muted font-mono whitespace-nowrap self-end sm:self-auto">
-          Tổng cộng: <span className="text-white font-semibold">{filteredProducts.length}</span> mặt hàng
+          {t('products.totalCount')} <span className="text-white font-semibold">{filteredProducts.length}</span> {t('products.itemsUnit')}
         </div>
       </div>
 

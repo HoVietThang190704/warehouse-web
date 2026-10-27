@@ -28,10 +28,12 @@ import {
   Product,
 } from '@/features/catalog';
 import { APP_ROUTES } from '@/config/navigation.config';
+import { useTranslation } from '@/lib/i18n';
 
 const { Text } = Typography;
 
 export default function CategoryDetailPage() {
+  const { t } = useTranslation();
   const params = useParams();
   const router = useRouter();
   const id = params?.id as string;
@@ -48,7 +50,7 @@ export default function CategoryDetailPage() {
     return (
       <div className="py-24 flex flex-col items-center justify-center space-y-3">
         <Spin size="large" />
-        <span className="text-xs text-sushi-text-dim font-mono">Đang tải thông tin nhóm hàng...</span>
+        <span className="text-xs text-sushi-text-dim font-mono">{t('categoryDetail.loading')}</span>
       </div>
     );
   }
@@ -57,12 +59,12 @@ export default function CategoryDetailPage() {
     return (
       <div className="space-y-4">
         <Link href={APP_ROUTES.CATEGORIES}>
-          <Button icon={<ArrowLeft size={16} />}>Quay lại danh sách</Button>
+          <Button icon={<ArrowLeft size={16} />}>{t('categoryDetail.backToList')}</Button>
         </Link>
         <Alert
           type="error"
-          message="Không tìm thấy nhóm hàng"
-          description="Nhóm hàng không tồn tại hoặc đã bị xóa."
+          message={t('categoryDetail.notFound')}
+          description={t('categoryDetail.notFoundDesc')}
           showIcon
         />
       </div>
@@ -86,11 +88,11 @@ export default function CategoryDetailPage() {
       {/* Header */}
       <SushiPageHeader
         title={category.name}
-        subtitle="Chi tiết nhóm hàng hóa và danh sách các mặt hàng trực thuộc"
+        subtitle={t('categoryDetail.subtitle')}
         extra={
           <div className="flex flex-wrap items-center gap-2">
             <Link href={APP_ROUTES.CATEGORIES}>
-              <Button icon={<ArrowLeft size={16} />}>Quay lại</Button>
+              <Button icon={<ArrowLeft size={16} />}>{t('detail.back')}</Button>
             </Link>
 
             <SushiButton
@@ -99,20 +101,20 @@ export default function CategoryDetailPage() {
               onClick={() => setIsEditModalOpen(true)}
               className="bg-blue-600 hover:bg-blue-500 font-semibold"
             >
-              Chỉnh Sửa
+              {t('detail.editBtn')}
             </SushiButton>
 
             {canDelete ? (
               <Popconfirm
-                title="Xóa nhóm hàng"
+                title={t('categoryDetail.deleteTitle')}
                 description={`Bạn có chắc muốn xóa nhóm hàng "${category.name}"?`}
                 onConfirm={handleDelete}
-                okText="Xóa"
-                cancelText="Hủy"
+                okText={t('dashboard.delete')}
+                cancelText={t('common.cancel')}
                 okButtonProps={{ danger: true }}
               >
                 <Button danger icon={<Trash size={16} />}>
-                  Xóa Nhóm Hàng
+                  {t('categoryDetail.deleteBtn')}
                 </Button>
               </Popconfirm>
             ) : null}
