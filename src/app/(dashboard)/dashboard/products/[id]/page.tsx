@@ -9,13 +9,11 @@ import {
   SushiButton,
   Button,
   Tag,
-  Typography,
   Package,
   ArrowLeft,
   PencilSimple,
   ArrowDown,
   ArrowUp,
-  WarningCircle,
   Warehouse,
   Spin,
   Alert,
@@ -32,8 +30,6 @@ import {
 import { useFormatCurrency } from '@/lib/hooks/use-format-currency';
 import { APP_ROUTES } from '@/config/navigation.config';
 import { useTranslation } from '@/lib/i18n';
-
-const { Text } = Typography;
 
 export default function ProductDetailPage() {
   const { t } = useTranslation();
@@ -67,7 +63,7 @@ export default function ProductDetailPage() {
         </Link>
         <Alert
           type="error"
-          message={t('detail.notFound')}
+          title={t('detail.notFound')}
           description={t('detail.notFoundDesc')}
           showIcon
         />

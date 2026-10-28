@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import {
   Modal,
   Form,
@@ -37,22 +37,20 @@ export function StockIssueModal({
   const { data: balances = [] } = useStockBalances();
   const issueMutation = useRecordIssue();
 
-  const [selectedProductId, setSelectedProductId] = useState<string | undefined>(
-    preselectedItem?.productId,
-  );
-  const [issueQty, setIssueQty] = useState<number>(1);
+  const watchedProductId = Form.useWatch('productId', form);
+  const selectedProductId = watchedProductId ?? preselectedItem?.productId;
+  const watchedQty = Form.useWatch('quantity', form);
+  const issueQty = Number(watchedQty ?? 1);
 
   // Sync when preselectedItem changes
   useEffect(() => {
-    if (preselectedItem) {
-      setSelectedProductId(preselectedItem.productId);
+    if (preselectedItem && open) {
       form.setFieldsValue({
         productId: preselectedItem.productId,
         quantity: 1,
       });
-      setIssueQty(1);
     }
-  }, [preselectedItem, form]);
+  }, [preselectedItem, open, form]);
 
   const currentItem = balances.find((b) => b.productId === selectedProductId);
   const availableQty = currentItem ? currentItem.quantity : 0;
@@ -115,7 +113,6 @@ export function StockIssueModal({
             showSearch
             placeholder={t('inventory.selectProductOutPlaceholder')}
             options={productOptions}
-            onChange={(val) => setSelectedProductId(val)}
             filterOption={(input, option) =>
               (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
             }
@@ -168,8 +165,6 @@ export function StockIssueModal({
               style={{ width: '100%' }}
               min={1}
               max={availableQty > 0 ? availableQty : 1}
-              value={issueQty}
-              onChange={(val) => setIssueQty(Number(val || 0))}
               placeholder="1"
             />
           </Form.Item>

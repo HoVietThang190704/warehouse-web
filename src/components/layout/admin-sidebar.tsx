@@ -13,7 +13,8 @@ import {
 } from '@/components/ui';
 import { SUSHICOLORS } from '@/lib/theme';
 import { useTranslation, LanguageSwitcher } from '@/lib/i18n';
-import { NAV_ITEMS, getActiveNavKey } from '@/config/navigation.config';
+import { getActiveNavKey, getAllowedNavItems } from '@/config/navigation.config';
+import { useAuth } from '@/features/auth';
 
 const { Sider } = Layout;
 
@@ -33,16 +34,25 @@ export function AdminSidebar({
   className,
 }: AdminSidebarProps) {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
-  // Tự động suy ra active key từ pathname thông qua navigation config
-  const selectedKey = useMemo(() => getActiveNavKey(pathname), [pathname]);
+  const allowedNavItems = useMemo(
+    () => getAllowedNavItems(user?.role),
+    [user?.role],
+  );
 
-  // Sinh danh sách Menu Items từ NAV_ITEMS (Không hardcode)
+  // Tự động suy ra active key từ pathname thông qua navigation config
+  const selectedKey = useMemo(
+    () => getActiveNavKey(pathname, allowedNavItems),
+    [pathname, allowedNavItems],
+  );
+
+  // Sinh danh sách Menu Items từ allowedNavItems theo phân quyền
   const menuItems = useMemo(
     () =>
-      NAV_ITEMS.map((item) => {
+      allowedNavItems.map((item) => {
         const IconComponent = item.icon;
         const isActive = selectedKey === item.key;
 
@@ -61,11 +71,11 @@ export function AdminSidebar({
           ),
         };
       }),
-    [selectedKey, t]
+    [allowedNavItems, selectedKey, t]
   );
 
   const handleMenuClick = ({ key }: { key: string }) => {
-    const targetItem = NAV_ITEMS.find((item) => item.key === key);
+    const targetItem = allowedNavItems.find((item) => item.key === key);
     if (targetItem) {
       onMobileClose?.();
       router.push(targetItem.path);

@@ -1,9 +1,8 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback } from 'react';
 import vi from '@/locales/vi.json';
 import en from '@/locales/en.json';
-import { Select } from 'antd';
 import { Globe } from '@phosphor-icons/react';
 
 export type Locale = 'vi' | 'en';
@@ -32,18 +31,19 @@ const I18nContext = createContext<I18nContextType | undefined>(undefined);
 const STORAGE_KEY = 'sushi_admin_locale';
 
 export function I18nProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>('vi');
-
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY) as Locale | null;
-      if (saved && (saved === 'vi' || saved === 'en')) {
-        setLocaleState((prev) => (prev !== saved ? saved : prev));
+  const [locale, setLocaleState] = useState<Locale>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY) as Locale | null;
+        if (saved && (saved === 'vi' || saved === 'en')) {
+          return saved;
+        }
+      } catch {
+        // Ignore storage access errors
       }
-    } catch {
-      // Ignore storage access errors
     }
-  }, []);
+    return 'vi';
+  });
 
   const setLocale = useCallback((newLocale: Locale) => {
     setLocaleState(newLocale);

@@ -4,8 +4,6 @@ import React from 'react';
 import Link from 'next/link';
 import {
   Table,
-  Tag,
-  Typography,
   SquaresFour,
   PencilSimple,
   Trash,
@@ -18,8 +16,6 @@ import {
 import { Category } from '../types';
 import { useTranslation } from '@/lib/i18n';
 import { APP_ROUTES } from '@/config/navigation.config';
-
-const { Text } = Typography;
 
 interface CategoryTableProps {
   categories: Category[];

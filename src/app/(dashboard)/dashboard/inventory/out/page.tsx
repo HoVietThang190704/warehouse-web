@@ -18,12 +18,16 @@ import {
 import { useStockBalances, useRecordIssue, StockIssueInput } from '@/features/inventory';
 import { APP_ROUTES } from '@/config/navigation.config';
 import { useTranslation } from '@/lib/i18n';
+import { useAuth } from '@/features/auth';
 
 export default function StockOutPage() {
   const router = useRouter();
   const { t } = useTranslation();
+  const { user } = useAuth();
   const [form] = Form.useForm<StockIssueInput>();
-  const { data: balances = [], isLoading } = useStockBalances();
+  const { data: balances = [], isLoading } = useStockBalances({
+    warehouseId: user?.warehouseId || undefined,
+  });
   const issueMutation = useRecordIssue();
 
   const [selectedProductId, setSelectedProductId] = useState<string | undefined>();
@@ -50,6 +54,7 @@ export default function StockOutPage() {
         quantity: Number(values.quantity),
         reason: values.reason,
         note: values.note,
+        warehouseId: user?.warehouseId || undefined,
       });
       form.resetFields();
       router.push(APP_ROUTES.INVENTORY);

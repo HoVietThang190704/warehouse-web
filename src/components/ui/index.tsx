@@ -121,10 +121,13 @@ export {
   Bell,
   Warning,
   FileArrowDown,
+  Users,
+  Key,
+  LockKey,
 } from '@phosphor-icons/react';
 
 // 4. Các Components được bọc phong cách Sushi Platform cao cấp (Bespoke Wrappers)
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button as AntdButton, ButtonProps, Card as AntdCard, CardProps } from 'antd';
 import { SUSHICOLORS } from '@/lib/theme';
 
@@ -204,6 +207,8 @@ export function SushiPageHeader({ title, subtitle, extra }: SushiPageHeaderProps
   );
 }
 
+export { UnauthorizedCard } from './unauthorized-card';
+
 // 5. Ant Design Context Bridge (Giải quyết triệt để cảnh báo dynamic theme static message)
 import {
   App as AntdApp,
@@ -225,14 +230,18 @@ let modalInstance: Omit<ModalStaticFunctions, 'warn'> = antdModal;
  */
 export const AntdStaticBridge: React.FC = () => {
   const staticFunctions = AntdApp.useApp();
-  messageInstance = staticFunctions.message;
-  notificationInstance = staticFunctions.notification;
-  modalInstance = staticFunctions.modal;
+
+  useEffect(() => {
+    messageInstance = staticFunctions.message;
+    notificationInstance = staticFunctions.notification;
+    modalInstance = staticFunctions.modal;
+  }, [staticFunctions]);
+
   return null;
 };
 
 export const message: MessageInstance & { useMessage: typeof antdMessage.useMessage } = new Proxy(
-  antdMessage as any,
+  antdMessage as unknown as MessageInstance & { useMessage: typeof antdMessage.useMessage },
   {
     get(_target, prop: keyof MessageInstance | 'useMessage') {
       if (prop === 'useMessage') {
@@ -244,7 +253,7 @@ export const message: MessageInstance & { useMessage: typeof antdMessage.useMess
 );
 
 export const notification: NotificationInstance & { useNotification: typeof antdNotification.useNotification } = new Proxy(
-  antdNotification as any,
+  antdNotification as unknown as NotificationInstance & { useNotification: typeof antdNotification.useNotification },
   {
     get(_target, prop: keyof NotificationInstance | 'useNotification') {
       if (prop === 'useNotification') {
@@ -256,10 +265,10 @@ export const notification: NotificationInstance & { useNotification: typeof antd
 );
 
 export const modal = new Proxy(
-  antdModal as any,
+  antdModal as unknown as Record<string, unknown>,
   {
-    get(_target, prop) {
-      return (modalInstance as any)[prop] ?? (antdModal as any)[prop];
+    get(_target, prop: string) {
+      return (modalInstance as unknown as Record<string, unknown>)[prop] ?? (antdModal as unknown as Record<string, unknown>)[prop];
     },
   }
 );

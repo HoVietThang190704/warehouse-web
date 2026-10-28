@@ -6,19 +6,20 @@ export function proxy(request: NextRequest) {
 
   const accessToken = request.cookies.get('access_token')?.value;
   const refreshToken = request.cookies.get('refresh_token')?.value;
-  const isAuthenticated = Boolean(accessToken || refreshToken);
+  const hasValidSession = Boolean(accessToken || refreshToken);
 
   const isAuthPage = pathname === '/';
   const isDashboardPage = pathname.startsWith('/dashboard');
 
   // 1. Chưa đăng nhập mà cố vào Dashboard -> Đẩy về trang Login (Server-side redirect)
-  if (isDashboardPage && !isAuthenticated) {
+  if (isDashboardPage && !hasValidSession) {
     const loginUrl = new URL('/', request.url);
     return NextResponse.redirect(loginUrl);
   }
 
-  // 2. Đã đăng nhập mà cố vào trang Login -> Đẩy thẳng vào Dashboard
-  if (isAuthPage && isAuthenticated) {
+  // 2. Chỉ tự động chuyển từ trang Login vào Dashboard khi người dùng có access_token hoạt động
+  // Tránh vòng lặp vô tận (redirect loop) khi phiên đăng nhập hết hạn hoặc refresh_token không hợp lệ
+  if (isAuthPage && accessToken) {
     const dashboardUrl = new URL('/dashboard', request.url);
     return NextResponse.redirect(dashboardUrl);
   }

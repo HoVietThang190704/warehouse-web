@@ -20,9 +20,13 @@ import {
   Product,
 } from '@/features/catalog';
 import { useTranslation } from '@/lib/i18n';
+import { useAuth } from '@/features/auth';
 
 export default function ProductsPage() {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const isStaff = user?.role === 'WAREHOUSE_STAFF';
+
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | undefined>();
   const [search, setSearch] = useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -54,14 +58,16 @@ export default function ProductsPage() {
         title={t('products.title')}
         subtitle={t('products.subtitle')}
         extra={
-          <SushiButton
-            type="primary"
-            icon={<Plus size={16} weight="bold" />}
-            onClick={() => setIsCreateModalOpen(true)}
-            className="bg-blue-600 hover:bg-blue-500 font-semibold"
-          >
-            {t('products.addProduct')}
-          </SushiButton>
+          !isStaff ? (
+            <SushiButton
+              type="primary"
+              icon={<Plus size={16} weight="bold" />}
+              onClick={() => setIsCreateModalOpen(true)}
+              className="bg-blue-600 hover:bg-blue-500 font-semibold"
+            >
+              {t('products.addProduct')}
+            </SushiButton>
+          ) : undefined
         }
       />
 
@@ -103,27 +109,30 @@ export default function ProductsPage() {
       <ProductTable
         products={filteredProducts}
         loading={isLoading}
-        onEdit={(prod) => setEditingProduct(prod)}
+        onEdit={isStaff ? undefined : (prod) => setEditingProduct(prod)}
       />
 
-      {/* Modal Thêm Mới Sản Phẩm */}
-      <CreateProductModal
-        open={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        onSubmit={async (dto) => {
-          await createProductMutation.mutateAsync(dto);
-        }}
-      />
+      {/* Modal Thêm Mới & Chỉnh Sửa Sản Phẩm (Chỉ dành cho Quản lý / Admin) */}
+      {!isStaff && (
+        <>
+          <CreateProductModal
+            open={isCreateModalOpen}
+            onClose={() => setIsCreateModalOpen(false)}
+            onSubmit={async (dto) => {
+              await createProductMutation.mutateAsync(dto);
+            }}
+          />
 
-      {/* Modal Chỉnh Sửa Sản Phẩm */}
-      <EditProductModal
-        open={Boolean(editingProduct)}
-        product={editingProduct}
-        onClose={() => setEditingProduct(null)}
-        onSubmit={async (id, dto) => {
-          await updateProductMutation.mutateAsync({ id, dto });
-        }}
-      />
+          <EditProductModal
+            open={Boolean(editingProduct)}
+            product={editingProduct}
+            onClose={() => setEditingProduct(null)}
+            onSubmit={async (id, dto) => {
+              await updateProductMutation.mutateAsync({ id, dto });
+            }}
+          />
+        </>
+      )}
     </div>
   );
 }

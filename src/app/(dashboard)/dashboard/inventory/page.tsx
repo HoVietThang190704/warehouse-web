@@ -29,9 +29,13 @@ import {
   inventoryApi,
 } from '@/features/inventory';
 import { useTranslation } from '@/lib/i18n';
+import { useAuth } from '@/features/auth';
 
 function InventoryContent() {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const isStaff = user?.role === 'WAREHOUSE_STAFF';
+
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -190,17 +194,19 @@ function InventoryContent() {
             >
               {t('inventory.exportExcel')}
             </SushiButton>
-            <SushiButton
-              type="primary"
-              icon={<ArrowDown size={16} weight="bold" />}
-              onClick={() => {
-                setSelectedItem(null);
-                setReceiptModalOpen(true);
-              }}
-              className="bg-emerald-600 hover:bg-emerald-500 font-semibold"
-            >
-              {t('inventory.stockIn')}
-            </SushiButton>
+            {!isStaff && (
+              <SushiButton
+                type="primary"
+                icon={<ArrowDown size={16} weight="bold" />}
+                onClick={() => {
+                  setSelectedItem(null);
+                  setReceiptModalOpen(true);
+                }}
+                className="bg-emerald-600 hover:bg-emerald-500 font-semibold"
+              >
+                {t('inventory.stockIn')}
+              </SushiButton>
+            )}
             <SushiButton
               type="primary"
               icon={<ArrowUp size={16} weight="bold" />}
@@ -298,7 +304,7 @@ function InventoryContent() {
           <StockBalanceTable
             balances={balances}
             loading={balancesLoading}
-            onQuickIn={handleQuickIn}
+            onQuickIn={isStaff ? undefined : handleQuickIn}
             onQuickOut={handleQuickOut}
           />
         </>
@@ -311,11 +317,13 @@ function InventoryContent() {
       )}
 
       {/* Modals */}
-      <StockReceiptModal
-        open={receiptModalOpen}
-        onClose={() => setReceiptModalOpen(false)}
-        preselectedItem={selectedItem}
-      />
+      {!isStaff && (
+        <StockReceiptModal
+          open={receiptModalOpen}
+          onClose={() => setReceiptModalOpen(false)}
+          preselectedItem={selectedItem}
+        />
+      )}
 
       <StockIssueModal
         open={issueModalOpen}

@@ -4,14 +4,24 @@ import React, { useMemo, useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslation } from '@/lib/i18n';
-import { NAV_ITEMS, getActiveNavKey } from '@/config/navigation.config';
+import { getActiveNavKey, getAllowedNavItems } from '@/config/navigation.config';
+import { useAuth } from '@/features/auth';
 
 export function AdminBottomNav() {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const pathname = usePathname();
 
+  const allowedNavItems = useMemo(
+    () => getAllowedNavItems(user?.role),
+    [user?.role],
+  );
+
   // Xác định active key tự động từ pathname thông qua navigation config
-  const selectedKey = useMemo(() => getActiveNavKey(pathname), [pathname]);
+  const selectedKey = useMemo(
+    () => getActiveNavKey(pathname, allowedNavItems),
+    [pathname, allowedNavItems],
+  );
 
   // Trạng thái hiển thị khi cuộn trang (Facebook-style scroll-to-hide)
   const [isVisible, setIsVisible] = useState(true);
@@ -93,7 +103,7 @@ export function AdminBottomNav() {
       }}
     >
       <div className="flex items-center justify-around h-14 px-2 rounded-full bg-[#1c1c20]/95 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.55)]">
-        {NAV_ITEMS.map((item) => {
+        {allowedNavItems.map((item) => {
           const IconComponent = item.icon;
           const isActive = selectedKey === item.key;
           const label = t(item.labelKey);
