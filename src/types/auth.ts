@@ -1,9 +1,7 @@
 export type UserRole =
   | 'SUPER_ADMIN'
-  | 'BRANCH_MANAGER'
-  | 'CASHIER'
-  | 'KITCHEN_STAFF'
-  | 'CUSTOMER';
+  | 'WAREHOUSE_MANAGER'
+  | 'WAREHOUSE_STAFF';
 
 export interface UserProfile {
   id: string;
@@ -11,6 +9,7 @@ export interface UserProfile {
   fullName: string;
   role: UserRole;
   branchId: string | null;
+  warehouseId?: string | null;
   isActive: boolean;
   createdAt: string;
 }

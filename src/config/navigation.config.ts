@@ -5,8 +5,10 @@ import {
   ArrowDown,
   ArrowUp,
   Warehouse,
+  Users,
 } from '@/components/ui';
 import { TranslationKey } from '@/lib/i18n';
+import { UserRole } from '@/types/auth';
 
 /**
  * Đường dẫn nội bộ toàn ứng dụng (Centralized App Routes)
@@ -22,6 +24,7 @@ export const APP_ROUTES = {
   CATEGORIES: '/dashboard/categories',
   CATEGORY_DETAIL: (id: string) => `/dashboard/categories/${id}`,
   ORDERS: '/dashboard/orders',
+  EMPLOYEES: '/dashboard/employees',
 } as const;
 
 export interface NavItem {
@@ -39,6 +42,7 @@ export interface NavItem {
     color?: string;
   };
   exact?: boolean;
+  allowedRoles?: readonly UserRole[];
 }
 
 export const NAV_ITEMS: readonly NavItem[] = [
@@ -60,6 +64,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
     path: APP_ROUTES.INBOUND,
     labelKey: 'dashboard.orders',
     icon: ArrowDown,
+    allowedRoles: ['SUPER_ADMIN', 'WAREHOUSE_MANAGER'],
   },
   {
     key: 'outbound',
@@ -73,13 +78,30 @@ export const NAV_ITEMS: readonly NavItem[] = [
     labelKey: 'dashboard.menuProducts',
     icon: Package,
   },
+  {
+    key: 'employees',
+    path: APP_ROUTES.EMPLOYEES,
+    labelKey: 'dashboard.menuEmployees',
+    icon: Users,
+    allowedRoles: ['SUPER_ADMIN'],
+  },
 ] as const;
+
+/**
+ * Lấy danh sách NavItem được phép truy cập theo vai trò của tài khoản
+ */
+export function getAllowedNavItems(role?: UserRole): readonly NavItem[] {
+  if (!role) return NAV_ITEMS;
+  return NAV_ITEMS.filter(
+    (item) => !item.allowedRoles || item.allowedRoles.includes(role),
+  );
+}
 
 /**
  * Tự động tìm key đang active từ đường dẫn hiện tại
  */
-export function getActiveNavKey(pathname: string): string {
-  const sorted = [...NAV_ITEMS].sort((a, b) => b.path.length - a.path.length);
+export function getActiveNavKey(pathname: string, items = NAV_ITEMS): string {
+  const sorted = [...items].sort((a, b) => b.path.length - a.path.length);
 
   for (const item of sorted) {
     if (item.exact) {
@@ -95,8 +117,8 @@ export function getActiveNavKey(pathname: string): string {
 /**
  * Trả về index của NavItem tương ứng theo pathname (phục vụ swipe gesture mobile)
  */
-export function getNavIndex(pathname: string): number {
-  const activeKey = getActiveNavKey(pathname);
-  const index = NAV_ITEMS.findIndex((item) => item.key === activeKey);
+export function getNavIndex(pathname: string, items = NAV_ITEMS): number {
+  const activeKey = getActiveNavKey(pathname, items);
+  const index = items.findIndex((item) => item.key === activeKey);
   return index !== -1 ? index : 0;
 }

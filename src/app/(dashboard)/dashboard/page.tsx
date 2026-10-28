@@ -35,18 +35,18 @@ export default function DashboardOverviewPage() {
   useInventorySocket();
 
   const lowStockCount = kpis?.lowStockCount ?? 0;
-  const lowStockItems = kpis?.lowStockItems ?? [];
   const recentMovements = kpis?.recentMovements ?? [];
 
   // Ưu tiên hàng hết/chưa nhập (màu đỏ: quantity <= 0) lên trên trước hàng sắp hết (màu vàng: quantity > 0)
   const sortedLowStockItems = useMemo(() => {
-    return [...lowStockItems].sort((a, b) => {
+    const items = kpis?.lowStockItems ?? [];
+    return [...items].sort((a, b) => {
       const aIsZero = a.quantity <= 0 ? 0 : 1;
       const bIsZero = b.quantity <= 0 ? 0 : 1;
       if (aIsZero !== bIsZero) return aIsZero - bIsZero;
       return a.quantity - b.quantity;
     });
-  }, [lowStockItems]);
+  }, [kpis?.lowStockItems]);
 
   const totalPages = Math.ceil(sortedLowStockItems.length / PAGE_SIZE) || 1;
   const currentPage = Math.min(lowStockPage, totalPages);

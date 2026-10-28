@@ -8,7 +8,6 @@ import {
   SushiButton,
   Button,
   Tag,
-  Typography,
   SquaresFour,
   ArrowLeft,
   PencilSimple,
@@ -29,8 +28,6 @@ import {
 } from '@/features/catalog';
 import { APP_ROUTES } from '@/config/navigation.config';
 import { useTranslation } from '@/lib/i18n';
-
-const { Text } = Typography;
 
 export default function CategoryDetailPage() {
   const { t } = useTranslation();
@@ -63,7 +60,7 @@ export default function CategoryDetailPage() {
         </Link>
         <Alert
           type="error"
-          message={t('categoryDetail.notFound')}
+          title={t('categoryDetail.notFound')}
           description={t('categoryDetail.notFoundDesc')}
           showIcon
         />

@@ -26,4 +26,11 @@ export const API_ENDPOINTS = {
     WAREHOUSES: '/api/inventory/warehouses',
     DOCUMENTS: '/api/inventory/documents',
   },
+  USERS: {
+    LIST: '/api/users',
+    CREATE: '/api/users',
+    UPDATE: (id: string) => `/api/users/${id}`,
+    STATUS: (id: string) => `/api/users/${id}/status`,
+    RESET_PASSWORD: (id: string) => `/api/users/${id}/reset-password`,
+  },
 } as const;

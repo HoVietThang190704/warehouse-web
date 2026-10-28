@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Modal,
   Form,
@@ -8,9 +8,8 @@ import {
   InputNumber,
   Select,
   Button,
-  message,
 } from '@/components/ui';
-import { StockBalanceItem, StockReceiptInput } from '../types';
+import { StockBalanceItem } from '../types';
 import { useRecordReceipt } from '../hooks/use-inventory';
 import { useProducts } from '@/features/catalog';
 import { useTranslation } from '@/lib/i18n';

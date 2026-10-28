@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import {
   Form,
@@ -21,7 +20,6 @@ import { createZodRule } from '@/lib/zod-validator';
 
 export function LoginForm() {
   const { t, locale, setLocale } = useTranslation();
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [form] = Form.useForm();

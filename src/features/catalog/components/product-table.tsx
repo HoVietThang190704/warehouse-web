@@ -174,15 +174,17 @@ export function ProductTable({ products, loading, onEdit }: ProductTableProps) {
             <Eye size={16} />
           </Link>
 
-          <button
-            type="button"
-            onClick={() => onEdit?.(record)}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-sushi-text-muted hover:text-white hover:bg-sushi-surface transition-colors cursor-pointer border border-transparent hover:border-sushi-border"
-            aria-label="Chỉnh sửa"
-            title="Chỉnh sửa"
-          >
-            <PencilSimple size={16} />
-          </button>
+          {onEdit && (
+            <button
+              type="button"
+              onClick={() => onEdit(record)}
+              className="w-8 h-8 rounded-lg flex items-center justify-center text-sushi-text-muted hover:text-white hover:bg-sushi-surface transition-colors cursor-pointer border border-transparent hover:border-sushi-border"
+              aria-label="Chỉnh sửa"
+              title="Chỉnh sửa"
+            >
+              <PencilSimple size={16} />
+            </button>
+          )}
         </div>
       ),
     },
@@ -285,7 +287,7 @@ export function ProductTable({ products, loading, onEdit }: ProductTableProps) {
                 </div>
 
                 {/* Hai nút hành động trên mobile: Xem chi tiết & Sửa */}
-                <div className="grid grid-cols-2 gap-2 pt-1">
+                <div className={`grid ${onEdit ? 'grid-cols-2' : 'grid-cols-1'} gap-2 pt-1`}>
                   <Link
                     href={APP_ROUTES.PRODUCT_DETAIL(prod.id)}
                     className="h-9 rounded-lg bg-blue-600/15 hover:bg-blue-600/30 text-blue-400 border border-blue-500/30 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
@@ -294,14 +296,16 @@ export function ProductTable({ products, loading, onEdit }: ProductTableProps) {
                     <span>Chi tiết</span>
                   </Link>
 
-                  <button
-                    type="button"
-                    onClick={() => onEdit?.(prod)}
-                    className="h-9 rounded-lg bg-sushi-surface hover:bg-sushi-card-hover text-slate-200 border border-sushi-border text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-                  >
-                    <PencilSimple size={15} />
-                    <span>Chỉnh sửa</span>
-                  </button>
+                  {onEdit && (
+                    <button
+                      type="button"
+                      onClick={() => onEdit(prod)}
+                      className="h-9 rounded-lg bg-sushi-surface hover:bg-sushi-card-hover text-slate-200 border border-sushi-border text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                    >
+                      <PencilSimple size={15} />
+                      <span>Chỉnh sửa</span>
+                    </button>
+                  )}
                 </div>
               </div>
             ))}

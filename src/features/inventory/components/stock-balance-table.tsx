@@ -5,7 +5,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import {
   Table,
-  Typography,
   Package,
   Button,
   Pagination,
@@ -17,8 +16,6 @@ import {
 import { StockBalanceItem } from '../types';
 import { APP_ROUTES } from '@/config/navigation.config';
 import { useTranslation } from '@/lib/i18n';
-
-const { Text } = Typography;
 
 interface StockBalanceTableProps {
   balances: StockBalanceItem[];

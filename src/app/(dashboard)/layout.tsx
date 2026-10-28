@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   Layout,
   Space,
@@ -25,14 +25,21 @@ const { Text } = Typography;
 function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const { t } = useTranslation();
   const pathname = usePathname();
-  const { loading } = useAuth();
+  const router = useRouter();
+  const { user, loading } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.replace('/');
+    }
+  }, [loading, user, router]);
 
   // Tách biệt logic cử chỉ vuốt và chuyển hướng vào hook chuyên biệt
   const { contentRef, direction, handlers } = useDashboardSwipe();
 
-  if (loading) {
+  if (loading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-sushi-bg text-sushi-text">
         <Space orientation="vertical" align="center" size="middle">

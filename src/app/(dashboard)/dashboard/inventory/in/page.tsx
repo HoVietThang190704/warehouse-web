@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -13,19 +13,26 @@ import {
   Button,
   ArrowLeft,
   ArrowDown,
-  message,
+  UnauthorizedCard,
 } from '@/components/ui';
 import { useProducts } from '@/features/catalog';
 import { useRecordReceipt, StockReceiptInput } from '@/features/inventory';
 import { APP_ROUTES } from '@/config/navigation.config';
 import { useTranslation } from '@/lib/i18n';
+import { useAuth } from '@/features/auth';
 
 export default function StockInPage() {
   const router = useRouter();
   const { t } = useTranslation();
+  const { user } = useAuth();
   const [form] = Form.useForm<StockReceiptInput>();
   const { data: products = [], isLoading: productsLoading } = useProducts();
   const receiptMutation = useRecordReceipt();
+
+  // Nhân viên kho cấp dưới không được phép vào trang nhập hàng
+  if (user?.role === 'WAREHOUSE_STAFF') {
+    return <UnauthorizedCard />;
+  }
 
   const productOptions = products.map((p) => ({
     value: p.id,

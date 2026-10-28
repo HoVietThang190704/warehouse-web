@@ -73,9 +73,15 @@ export async function fetchApi<T = unknown>(
         return fetchApi<T>(endpoint, options, true);
       } else {
         processQueue(new Error('Phiên đăng nhập đã hết hạn'));
+        if (typeof window !== 'undefined' && window.location.pathname !== '/') {
+          window.location.href = '/';
+        }
       }
     } catch (err) {
       processQueue(err);
+      if (typeof window !== 'undefined' && window.location.pathname !== '/') {
+        window.location.href = '/';
+      }
     } finally {
       isRefreshing = false;
     }

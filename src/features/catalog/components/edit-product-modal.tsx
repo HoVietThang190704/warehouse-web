@@ -40,8 +40,10 @@ export function EditProductModal({
   const [form] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [imageUrl, setImageUrl] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const watchedImageUrl = Form.useWatch('imageUrl', form);
+  const imageUrl = watchedImageUrl ?? product?.imageUrl ?? '';
 
   const { options: categoryOptions } = useCategoryOptions();
   const { options: unitOptions } = useUnitOptions();
@@ -65,7 +67,6 @@ export function EditProductModal({
         imageUrl: product.imageUrl || '',
         isActive: product.isActive !== undefined ? product.isActive : true,
       });
-      setImageUrl(product.imageUrl || '');
     }
   }, [product, open, form]);
 
@@ -86,7 +87,6 @@ export function EditProductModal({
     try {
       setUploading(true);
       const result = await catalogApi.uploadImage(file);
-      setImageUrl(result.url);
       form.setFieldValue('imageUrl', result.url);
       message.success(t('products.imageUploadSuccess'));
     } catch (err: unknown) {
@@ -101,7 +101,6 @@ export function EditProductModal({
   };
 
   const handleRemoveImage = () => {
-    setImageUrl('');
     form.setFieldValue('imageUrl', '');
   };
 
@@ -119,7 +118,6 @@ export function EditProductModal({
     try {
       await onSubmit(product.id, result.data);
       form.resetFields();
-      setImageUrl('');
       onClose();
     } catch {
       // Handled in mutation hook
@@ -130,7 +128,6 @@ export function EditProductModal({
 
   const handleModalClose = () => {
     form.resetFields();
-    setImageUrl('');
     onClose();
   };
 
