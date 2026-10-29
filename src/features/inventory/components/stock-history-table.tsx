@@ -310,10 +310,43 @@ export function StockHistoryTable({ documents, loading }: StockHistoryTableProps
                     </div>
                   )}
 
-                  {/* Footer thẻ: Ngày giờ */}
-                  <div className="flex items-center justify-between text-2xs font-mono text-sushi-text-dim pt-1 border-t border-sushi-border/40">
-                    <span>Thời gian:</span>
-                    <span className="text-slate-300 font-medium">{formattedDate}</span>
+                  {/* Footer thẻ: Người thực hiện & Ngày giờ */}
+                  <div className="pt-2 border-t border-sushi-border/40 space-y-1.5 text-2xs">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-sushi-text-dim shrink-0">
+                        {t('inventory.historyPerformer')}:
+                      </span>
+                      {(() => {
+                        const performer = doc.posterName || doc.creatorName || t('inventory.historyUnknown');
+                        const isUnknown = performer === t('inventory.historyUnknown');
+
+                        return (
+                          <div className="flex items-center gap-1.5 min-w-0 justify-end">
+                            <div
+                              className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 text-3xs ${
+                                isUnknown
+                                  ? 'bg-slate-700/50 text-slate-400'
+                                  : 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                              }`}
+                            >
+                              <User size={11} />
+                            </div>
+                            <span
+                              className={`truncate font-medium ${
+                                isUnknown ? 'text-sushi-text-dim italic' : 'text-slate-200'
+                              }`}
+                            >
+                              {performer}
+                            </span>
+                          </div>
+                        );
+                      })()}
+                    </div>
+
+                    <div className="flex items-center justify-between font-mono text-sushi-text-dim">
+                      <span>{t('inventory.historyTime')}:</span>
+                      <span className="text-slate-300 font-medium">{formattedDate}</span>
+                    </div>
                   </div>
                 </div>
               );

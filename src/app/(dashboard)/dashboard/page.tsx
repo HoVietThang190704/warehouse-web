@@ -16,6 +16,7 @@ import {
   Info,
   CaretLeft,
   CaretRight,
+  User,
 } from '@/components/ui';
 import {
   useDashboardKpis,
@@ -300,6 +301,12 @@ export default function DashboardOverviewPage() {
                               </>
                             )}
                           </div>
+                          {m.performerName && (
+                            <div className="text-2xs text-slate-300/90 flex items-center gap-1 mt-1 truncate">
+                              <User size={11} className="text-sushi-text-dim shrink-0" />
+                              <span className="truncate">{m.performerName}</span>
+                            </div>
+                          )}
                         </div>
                       </div>
 
