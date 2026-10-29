@@ -186,14 +186,16 @@ function InventoryContent() {
         subtitle={t('inventory.subtitle')}
         extra={
           <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
-            <SushiButton
-              icon={<FileArrowDown size={16} weight="bold" />}
-              onClick={handleExportExcel}
-              loading={exportLoading}
-              className="!bg-emerald-950/40 hover:!bg-emerald-900/50 !text-emerald-400 hover:!text-emerald-300 !border-emerald-600/40 font-semibold"
-            >
-              {t('inventory.exportExcel')}
-            </SushiButton>
+            {!isStaff && (
+              <SushiButton
+                icon={<FileArrowDown size={16} weight="bold" />}
+                onClick={handleExportExcel}
+                loading={exportLoading}
+                className="!bg-emerald-950/40 hover:!bg-emerald-900/50 !text-emerald-400 hover:!text-emerald-300 !border-emerald-600/40 font-semibold"
+              >
+                {t('inventory.exportExcel')}
+              </SushiButton>
+            )}
             {!isStaff && (
               <SushiButton
                 type="primary"
