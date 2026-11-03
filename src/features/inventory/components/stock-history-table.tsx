@@ -16,9 +16,14 @@ import { useTranslation } from '@/lib/i18n';
 interface StockHistoryTableProps {
   documents: StockDocumentItem[];
   loading?: boolean;
+  isFiltered?: boolean;
 }
 
-export function StockHistoryTable({ documents, loading }: StockHistoryTableProps) {
+export function StockHistoryTable({
+  documents,
+  loading,
+  isFiltered,
+}: StockHistoryTableProps) {
   const { t } = useTranslation();
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
@@ -194,7 +199,7 @@ export function StockHistoryTable({ documents, loading }: StockHistoryTableProps
       },
     },
     {
-      title: 'Ghi chú',
+      title: t('inventory.historyNote'),
       dataIndex: 'note',
       key: 'note',
       width: 180,
@@ -212,10 +217,10 @@ export function StockHistoryTable({ documents, loading }: StockHistoryTableProps
         <div className="flex items-center space-x-2">
           <Receipt size={18} className="text-blue-400" />
           <h3 className="text-sm font-bold text-white font-sans">
-            Lịch Sử Nhập / Xuất Hàng
+            {t('inventory.historyTitle')}
           </h3>
           <span className="text-2xs font-mono text-sushi-text-dim px-2 py-0.5 rounded-full bg-sushi-surface border border-sushi-border">
-            {documents.length} chứng từ
+            {documents.length} {t('inventory.historyDocCount')}
           </span>
         </div>
       </div>
@@ -228,7 +233,9 @@ export function StockHistoryTable({ documents, loading }: StockHistoryTableProps
           </div>
         ) : documents.length === 0 ? (
           <div className="p-8 text-center text-xs text-sushi-text-dim">
-            Chưa có chứng từ nhập xuất nào
+            {isFiltered
+              ? t('inventory.historyEmptyFiltered')
+              : 'Chưa có chứng từ nhập xuất nào'}
           </div>
         ) : (
           <>

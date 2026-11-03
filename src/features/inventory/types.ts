@@ -129,3 +129,21 @@ export interface StockDocumentItem {
   totalAmount: number;
   items: StockDocumentDetailItem[];
 }
+
+export interface InventoryPerformer {
+  id: string;
+  fullName: string;
+  email: string;
+  role: string;
+}
+
+export type StockDocumentFilterType = 'ALL' | 'IN' | 'OUT' | StockDocumentType;
+
+export interface StockDocumentQueryParams {
+  warehouseId?: string;
+  startDate?: string;
+  endDate?: string;
+  userId?: string;
+  type?: StockDocumentFilterType;
+  search?: string;
+}

@@ -25,6 +25,7 @@ export const API_ENDPOINTS = {
     KPIS: '/api/inventory/kpis',
     WAREHOUSES: '/api/inventory/warehouses',
     DOCUMENTS: '/api/inventory/documents',
+    PERFORMERS: '/api/inventory/performers',
   },
   USERS: {
     LIST: '/api/users',

@@ -9,6 +9,8 @@ import {
   WarehouseItem,
   DashboardKpis,
   StockDocumentItem,
+  StockDocumentQueryParams,
+  InventoryPerformer,
 } from '../types';
 
 export const inventoryApi = {
@@ -64,10 +66,24 @@ export const inventoryApi = {
   },
 
   /**
-   * Lấy lịch sử chứng từ
+   * Lấy lịch sử chứng từ kèm bộ lọc
    */
-  getDocuments: async (warehouseId?: string): Promise<StockDocumentItem[]> => {
-    const q = warehouseId ? `?warehouseId=${encodeURIComponent(warehouseId)}` : '';
-    return fetchApi<StockDocumentItem[]>(`${API_ENDPOINTS.INVENTORY.DOCUMENTS}${q}`);
+  getDocuments: async (params?: StockDocumentQueryParams): Promise<StockDocumentItem[]> => {
+    const q = new URLSearchParams();
+    if (params?.warehouseId) q.append('warehouseId', params.warehouseId);
+    if (params?.startDate) q.append('startDate', params.startDate);
+    if (params?.endDate) q.append('endDate', params.endDate);
+    if (params?.userId) q.append('userId', params.userId);
+    if (params?.type && params.type !== 'ALL') q.append('type', params.type);
+    if (params?.search) q.append('search', params.search);
+    const queryString = q.toString() ? `?${q.toString()}` : '';
+    return fetchApi<StockDocumentItem[]>(`${API_ENDPOINTS.INVENTORY.DOCUMENTS}${queryString}`);
+  },
+
+  /**
+   * Lấy danh sách nhân viên thực hiện giao dịch kho (phục vụ bộ lọc)
+   */
+  getPerformers: async (): Promise<InventoryPerformer[]> => {
+    return fetchApi<InventoryPerformer[]>(API_ENDPOINTS.INVENTORY.PERFORMERS);
   },
 };
