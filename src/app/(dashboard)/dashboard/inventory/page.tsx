@@ -20,12 +20,15 @@ import ExcelJS from 'exceljs';
 import {
   StockBalanceTable,
   StockHistoryTable,
+  StockHistoryFilter,
   StockReceiptModal,
   StockIssueModal,
   useStockBalances,
   useStockDocuments,
+  useInventoryPerformers,
   useInventorySocket,
   StockBalanceItem,
+  StockDocumentQueryParams,
   inventoryApi,
 } from '@/features/inventory';
 import { useTranslation } from '@/lib/i18n';
@@ -52,8 +55,13 @@ function InventoryContent() {
     const query = params.toString();
     router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
   };
+
+  // State cho Sổ tồn kho
   const [search, setSearch] = useState('');
   const [lowStockOnly, setLowStockOnly] = useState(false);
+
+  // State cho Lịch sử xuất / nhập kho
+  const [historyFilters, setHistoryFilters] = useState<StockDocumentQueryParams>({});
 
   const [receiptModalOpen, setReceiptModalOpen] = useState(false);
   const [issueModalOpen, setIssueModalOpen] = useState(false);
@@ -67,7 +75,9 @@ function InventoryContent() {
     search,
   });
 
-  const { data: documents = [], isLoading: documentsLoading } = useStockDocuments();
+  const { data: documents = [], isLoading: documentsLoading } =
+    useStockDocuments(historyFilters);
+  const { data: performers = [] } = useInventoryPerformers();
 
   // Calculate quick summary metrics
   const totalStockUnits = useMemo(() => {
@@ -163,8 +173,17 @@ function InventoryContent() {
       const url = window.URL.createObjectURL(blob);
       const anchor = document.createElement('a');
       anchor.href = url;
-      const dateStr = new Date().toISOString().slice(0, 10);
-      anchor.download = `bao-cao-ton-kho-${dateStr}.xlsx`;
+
+      // Đặt tên file theo định dạng: Báo cáo tồn kho [Tên kho] - [Thời gian hiện tại]
+      const now = new Date();
+      const timeStr = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(
+        now.getDate(),
+      ).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}${String(
+        now.getMinutes(),
+      ).padStart(2, '0')}`;
+      const warehouseName = allBalances[0]?.warehouseName || 'Tong';
+      anchor.download = `BaoCaoTonKho_${warehouseName}_${timeStr}.xlsx`;
+
       document.body.appendChild(anchor);
       anchor.click();
       document.body.removeChild(anchor);
@@ -188,10 +207,11 @@ function InventoryContent() {
           <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
             {!isStaff && (
               <SushiButton
-                icon={<FileArrowDown size={16} weight="bold" />}
+                type="default"
+                icon={<FileArrowDown size={16} weight="bold" className="text-emerald-400" />}
                 onClick={handleExportExcel}
                 loading={exportLoading}
-                className="!bg-emerald-950/40 hover:!bg-emerald-900/50 !text-emerald-400 hover:!text-emerald-300 !border-emerald-600/40 font-semibold"
+                className="!bg-slate-900/80 hover:!bg-slate-800 !text-emerald-400 hover:!text-emerald-300 !border-emerald-500/40 font-semibold"
               >
                 {t('inventory.exportExcel')}
               </SushiButton>
@@ -255,7 +275,7 @@ function InventoryContent() {
 
       {activeTab === 'balance' ? (
         <>
-          {/* Filter and Quick Stats Toolbar */}
+          {/* Filter and Quick Stats Toolbar cho Sổ tồn */}
           <div className="p-4 rounded-2xl bg-sushi-card border border-sushi-border flex flex-col md:flex-row gap-3 items-center justify-between shadow-sm">
             <div className="flex flex-col sm:flex-row gap-3 items-center w-full md:w-auto flex-1">
               {/* Ô Tìm kiếm */}
@@ -311,11 +331,28 @@ function InventoryContent() {
           />
         </>
       ) : (
-        /* Table Lịch Sử Nhập / Xuất Chứng Từ */
-        <StockHistoryTable
-          documents={documents}
-          loading={documentsLoading}
-        />
+        <>
+          {/* Bộ lọc Lịch Sử Xuất / Nhập (Desktop Toolbar & Mobile Bottom Sheet Drawer) */}
+          <StockHistoryFilter
+            performers={performers}
+            value={historyFilters}
+            onChange={setHistoryFilters}
+            onReset={() => setHistoryFilters({})}
+          />
+
+          {/* Table Lịch Sử Nhập / Xuất Chứng Từ */}
+          <StockHistoryTable
+            documents={documents}
+            loading={documentsLoading}
+            isFiltered={Boolean(
+              historyFilters.startDate ||
+                historyFilters.endDate ||
+                historyFilters.userId ||
+                (historyFilters.type && historyFilters.type !== 'ALL') ||
+                historyFilters.search,
+            )}
+          />
+        </>
       )}
 
       {/* Modals */}

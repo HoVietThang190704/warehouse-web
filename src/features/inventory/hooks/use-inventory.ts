@@ -7,6 +7,7 @@ import {
   StockIssueInput,
   StockReceiptResult,
   StockIssueResult,
+  StockDocumentQueryParams,
 } from '../types';
 import { message } from '@/components/ui';
 
@@ -16,7 +17,9 @@ export const inventoryKeys = {
     [...inventoryKeys.all, 'balances', params] as const,
   warehouses: () => [...inventoryKeys.all, 'warehouses'] as const,
   kpis: (warehouseId?: string) => [...inventoryKeys.all, 'kpis', warehouseId] as const,
-  documents: (warehouseId?: string) => [...inventoryKeys.all, 'documents', warehouseId] as const,
+  documents: (params?: StockDocumentQueryParams) =>
+    [...inventoryKeys.all, 'documents', params] as const,
+  performers: () => [...inventoryKeys.all, 'performers'] as const,
 };
 
 export function useStockBalances(params?: {
@@ -46,11 +49,19 @@ export function useDashboardKpis(warehouseId?: string) {
   });
 }
 
-export function useStockDocuments(warehouseId?: string) {
+export function useStockDocuments(params?: StockDocumentQueryParams) {
   return useQuery({
-    queryKey: inventoryKeys.documents(warehouseId),
-    queryFn: () => inventoryApi.getDocuments(warehouseId),
+    queryKey: inventoryKeys.documents(params),
+    queryFn: () => inventoryApi.getDocuments(params),
     refetchInterval: 60000,
+  });
+}
+
+export function useInventoryPerformers() {
+  return useQuery({
+    queryKey: inventoryKeys.performers(),
+    queryFn: () => inventoryApi.getPerformers(),
+    staleTime: 5 * 60 * 1000,
   });
 }
 

@@ -5,6 +5,7 @@ export {
   useWarehouses,
   useDashboardKpis,
   useStockDocuments,
+  useInventoryPerformers,
   useRecordReceipt,
   useRecordIssue,
   inventoryKeys,
@@ -14,3 +15,4 @@ export { StockBalanceTable } from './components/stock-balance-table';
 export { StockReceiptModal } from './components/stock-receipt-modal';
 export { StockIssueModal } from './components/stock-issue-modal';
 export { StockHistoryTable } from './components/stock-history-table';
+export { StockHistoryFilter } from './components/stock-history-filter';
